@@ -97,11 +97,11 @@ function renderRegisterPage() {
     mainContent.innerHTML = `
         <h2>Register</h2>
         <form id="register-form">
-            <input type="text" id="nickname" placeholder="Nickname" required>
+            <input type="text" id="nickname" placeholder="Nickname" maxlength="32" required>
             <input type="text" id="firstName" placeholder="First Name" required>
             <input type="text" id="lastName" placeholder="Last Name" required>
-            <input type="email" id="email" placeholder="E-mail" required>
-            <input type="password" id="password" placeholder="Password" required>
+            <input type="email" id="email" placeholder="E-mail" maxlength="320" required>
+            <input type="password" id="password" placeholder="Password" minlength="8" required>
             <label for="age">Date of Birth:</label>
             <input type="date" id="age" min="1900-01-01" max="${maxDate}" required>
             <select id="gender" required>
@@ -382,8 +382,12 @@ function renderPage(path) {
                 break;
             case '#/posts':
             case '#/':
-            default:
+            case '':    
                 renderPostsPage();
+                break;
+            case '#/error':
+            default:
+                navigate('#/error');
         }
     } else {
         switch (path) {
@@ -394,11 +398,17 @@ function renderPage(path) {
                 renderErrorPage();
                 break;
             case '#/login':
-            case '#/':
                 renderLoginPage();
                 break;
-            default:
+            case '#/posts':
+            case '#/chats':
+            case '#/':
+            case '':
                 navigate('#/login');
+                break;
+            default:
+                console.log(path);
+                navigate('#/error');
         }
     }
 }
@@ -474,6 +484,8 @@ async function handleCreatePost(event) {
         document.getElementById('post-content').value = '';
         document.querySelectorAll('#category-checkboxes input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
         ws.send(JSON.stringify({ type: 'new_post', payload: postData }));
+        displayPosts();
+        hideCreatePostModal();
     } else {
         alert(data.error);
     }
@@ -553,6 +565,7 @@ function handleLogout() {
     if (ws) {
         ws.close();
     }
+    console.log("was");
     updateNav();
     navigate('#/login');
 }
@@ -564,12 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
         connectWebSocket();
     }
     renderCreatePostModal();
-    if (location.pathname !== '/') {
-        history.replaceState(null, '', '/#/error');
-        renderPage('#/error');
-    } else {
-        renderPage(location.hash || '#/posts');
-    }
+    renderPage(location.hash || '#/posts');
 });
 
 loginLink.addEventListener('click', () => navigate('#/login'));

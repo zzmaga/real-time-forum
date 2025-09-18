@@ -73,7 +73,10 @@ func (m *MainHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		Password  string `json:"password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&newUserRequest); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"error":   http.StatusText(http.StatusBadRequest),
+		})
 		return
 	}
 	newUser := &models.User{
@@ -88,13 +91,15 @@ func (m *MainHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	_, err := m.service.User.Create(newUser)
 	if err != nil {
-		http.Error(w, "could not create user", http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"error":   err.Error(),
+		})
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
-		"message": "User created successfully",
 	})
 }
 
