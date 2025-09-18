@@ -10,12 +10,13 @@ import (
 
 func (s *SessionRepo) GetByUuid(uuid string) (*models.Session, error) {
 	row := s.db.QueryRow(`
-SELECT id, uuid, expired_at, user_id FROM sessions
+SELECT uuid, expired_at, user_id FROM sessions
 WHERE uuid = ?`, uuid)
 	session := &models.Session{}
 	strExpiredAt := ""
-
-	err := row.Scan(&session.ID, &session.Uuid, &strExpiredAt, &session.UserID)
+	// ты в селект добавил id и внизу session.id или как то так
+	// У нас в базе нет поле id
+	err := row.Scan(&session.Uuid, &strExpiredAt, &session.UserID)
 
 	switch {
 	case err == nil:

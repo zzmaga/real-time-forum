@@ -22,8 +22,8 @@ function updateNav() {
     } else {
         loginLink.style.display = 'inline';
         registerLink.style.display = 'inline';
-        postsLink.style.display = 'inline';
-        chatsLink.style.display = 'inline';
+        postsLink.style.display = 'none';
+        chatsLink.style.display = 'none';
         logoutLink.style.display = 'none';
     }
 }
@@ -171,9 +171,11 @@ async function displayPosts() {
     const postsContainer = document.getElementById('posts-container');
     postsContainer.innerHTML = '';
     let posts = null;
+    console.log(userToken);
     try {
         const response = await fetch('/api/posts', {
-            headers: { 'Authorization': `Bearer ${userToken}` }
+            method: 'GET',
+            headers: { 'Authorization': `${userToken}` }
         });
         posts = await handleAuthResponse(response);
     } catch (error) {
@@ -182,16 +184,8 @@ async function displayPosts() {
     }
 
     if (!posts || posts.length === 0) {
-        // DUMMY POST. Добавил чтобы просто посмотреть как посты смотрятся. А так удалю как только в базе будут хоть какие то посты
-        const dummyPost = {
-            title: "First Post!",
-            content: "Hello everyone! This is my first post on this forum. I'm excited to be here and look forward to some great discussions.",
-            author: "Admin",
-            category: "General"
-        };
-        posts.push(dummyPost);
-        //postsContainer.innerHTML = '<p>No posts yet. Be the first to post!</p>';
-        //return;
+        postsContainer.innerHTML = '<p>No posts yet. Be the first to post!</p>';
+        return;
     }
     posts.forEach(post => {
         const postElement = document.createElement('div');
@@ -199,8 +193,8 @@ async function displayPosts() {
         const categories = Array.isArray(post.category) ? post.category.join(', ') : post.category;
         
         postElement.innerHTML = `
-            <h3 class="post-title" style="cursor: pointer;">${post.title}</h3>
-            <p>${post.content}</p>
+            <h3 class="post-title" style="cursor: pointer;">${post.Title}</h3>
+            <p>${post.Content}</p>
             <small>By: ${post.author} | Categories: ${categories}</small>
         `;
 
@@ -399,12 +393,6 @@ function renderPage(path) {
             case '#/error':
                 renderErrorPage();
                 break;
-            case '#/posts':
-                renderPostsPage();
-                break;
-            case '#/chats':
-                renderChatsPage();
-                break;
             case '#/login':
             case '#/':
                 renderLoginPage();
@@ -426,14 +414,12 @@ async function handleLogin(event) {
     });
     const data = await response.json();
     if (data.success) {
-        console.log("here");
         localStorage.setItem('userToken', data.token);
         userToken = data.token;
         updateNav();
         navigate('#/posts');
         connectWebSocket();
     } else {
-        console.log("here2")
         alert(data.error);
     }
 }
@@ -478,7 +464,7 @@ async function handleCreatePost(event) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${userToken}`
+            'Authorization': `${userToken}`
         },
         body: JSON.stringify(postData)
     });

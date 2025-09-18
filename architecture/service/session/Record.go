@@ -17,6 +17,7 @@ func (s *SessionService) Record(userId int64) (*models.Session, error) {
 	session := &models.Session{
 		Uuid:      uid.String(),
 		UserID:    userId,
+		CreatedAt: time.Now(),
 		ExpiredAt: time.Now().Add(models.SessionExpiredAfter),
 	}
 
