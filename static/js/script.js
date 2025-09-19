@@ -237,8 +237,8 @@ async function showPostAndComments(postId) {
         comments.forEach(comment => {
             commentsHtml += `
                 <div class="comment">
-                    <p><strong>${comment.author}</strong> on ${new Date(comment.created_at).toLocaleString()}</p>
-                    <p>${comment.content}</p>
+                    <p><strong>${comment.Author}</strong> on ${new Date(comment.CreatedAt).toLocaleString()}</p>
+                    <p>${comment.Content}</p>
                 </div>
             `;
         });
@@ -246,9 +246,9 @@ async function showPostAndComments(postId) {
 
     mainContent.innerHTML = `
         <div class="single-post-container">
-            <h2>${post.title}</h2>
-            <p>${post.content}</p>
-            <small>By: ${post.author} | Categories: ${Array.isArray(post.category) ? post.category.join(', ') : post.category}</small>
+            <h2>${post.Title}</h2>
+            <p>${post.Content}</p>
+            <small>By: ${post.Author} | Categories: ${Array.isArray(post.Category) ? post.Category.join(', ') : post.Category}</small>
             <hr>
             <div id="comments-section">
                 <h3>Comments</h3>
