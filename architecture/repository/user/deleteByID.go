@@ -6,7 +6,6 @@ import (
 )
 
 func (u *UserRepo) DeleteByID(id int64) error {
-
 	result, err := u.DB.Exec(`DELETE FROM users WHERE id = ?`, id)
 	if err != nil {
 		return fmt.Errorf("DeleteByID: %w", err)
