@@ -32,6 +32,10 @@ func migrate(db *sql.DB) error {
 			nickname NVARCHAR(32) UNIQUE NOT NULL CHECK(LENGTH(nickname) <= 32),
 			email NVARCHAR(320) UNIQUE NOT NULL CHECK(LENGTH(email) <= 320),
 			password TEXT NOT NULL,
+			first_name NVARCHAR(50) NOT NULL,
+			last_name NVARCHAR(50) NOT NULL,
+			age INTEGER NOT NULL,
+			gender NVARCHAR(10) NOT NULL,
 			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 		);`,
@@ -52,6 +56,43 @@ func migrate(db *sql.DB) error {
 			expired_at DATETIME NOT NULL,
 			FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 		);`,
+		// categories
+		`CREATE TABLE IF NOT EXISTS categories (
+			id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+			name NVARCHAR(50) UNIQUE NOT NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);`,
+		// post_categories junction table
+		`CREATE TABLE IF NOT EXISTS post_categories (
+			id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+			post_id INTEGER NOT NULL,
+			category_id INTEGER NOT NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE,
+			FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE CASCADE,
+			UNIQUE(post_id, category_id)
+		);`,
+		// post_comments
+		`CREATE TABLE IF NOT EXISTS post_comments (
+			id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+			post_id INTEGER NOT NULL,
+			user_id INTEGER NOT NULL,
+			content TEXT NOT NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE,
+			FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+		);`,
+		// private_messages
+		`CREATE TABLE IF NOT EXISTS private_messages (
+			id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+			sender_id INTEGER NOT NULL,
+			recipient_id INTEGER NOT NULL,
+			content TEXT NOT NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY(sender_id) REFERENCES users(id) ON DELETE CASCADE,
+			FOREIGN KEY(recipient_id) REFERENCES users(id) ON DELETE CASCADE
+		);`,
 	}
 
 	for _, q := range stmts {
@@ -63,6 +104,10 @@ func migrate(db *sql.DB) error {
 	// compatibility adjustments for legacy schemas
 	// TODO add updated_at to posts
 	ensureColumn(db, "posts", "updated_at", "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP")
+	ensureColumn(db, "users", "first_name", "NVARCHAR(50) DEFAULT ''")
+	ensureColumn(db, "users", "last_name", "NVARCHAR(50) DEFAULT ''")
+	ensureColumn(db, "users", "age", "INTEGER DEFAULT 0")
+	ensureColumn(db, "users", "gender", "NVARCHAR(10) DEFAULT 'other'")
 	_, _ = db.Exec(`UPDATE users SET nickname = email WHERE (nickname IS NULL OR nickname = '') AND email IS NOT NULL AND email != ''`)
 	return nil
 }
