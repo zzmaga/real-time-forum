@@ -52,11 +52,20 @@ func (u *User) ValidatePassword() error {
 }
 
 func (u *User) ValidateAge() error {
+	if u.Age < 0 || u.Age > 150 {
+		return fmt.Errorf("age: invalid value (%d), must be between 0 and 150", u.Age)
+	}
 	return nil
 }
 
 func (u *User) ValidateGender() error {
-	return nil
+	validGenders := []string{"male", "female", "other"}
+	for _, gender := range validGenders {
+		if u.Gender == gender {
+			return nil
+		}
+	}
+	return fmt.Errorf("gender: invalid value (%s), must be one of: male, female, other", u.Gender)
 }
 
 func (u *User) HashPassword() error {
