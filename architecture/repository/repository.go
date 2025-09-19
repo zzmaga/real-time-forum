@@ -8,6 +8,7 @@ import (
 	"real-time-forum/architecture/repository/post_comment"
 	"real-time-forum/architecture/repository/post_comment_vote"
 	"real-time-forum/architecture/repository/post_vote"
+	"real-time-forum/architecture/repository/private_message"
 	"real-time-forum/architecture/repository/session"
 	"real-time-forum/architecture/repository/user"
 )
@@ -19,6 +20,7 @@ type Repository struct {
 	Category        models.CategoryRepo
 	PostComment     models.PostCommentRepo
 	PostCommentVote models.PostCommentVoteRepo
+	PrivateMessage  models.PrivateMessageRepo
 	Session         models.SessionRepo
 }
 
@@ -30,6 +32,7 @@ func NewRepo(db *sql.DB) *Repository {
 		Category:        category.NewCategoryRepo(db),
 		PostComment:     post_comment.NewPostCommentRepo(db),
 		PostCommentVote: post_comment_vote.NewPostCommentVoteRepo(db),
+		PrivateMessage:  private_message.NewPrivateMessageRepo(db),
 		Session:         session.NewSessionRepo(db),
 	}
 }
