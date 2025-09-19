@@ -187,6 +187,8 @@ async function displayPosts() {
         postsContainer.innerHTML = '<p>No posts yet. Be the first to post!</p>';
         return;
     }
+    posts.sort((a, b) => new Date(b.CreatedAt)- new Date(a.CreatedAt));
+    console.log(posts);
     posts.forEach(post => {
         const postElement = document.createElement('div');
         postElement.className = 'post-card';
@@ -202,7 +204,6 @@ async function displayPosts() {
         postElement.querySelector('.post-title').addEventListener('click', () => {
             showPostAndComments(post.id);
         });
-
         postsContainer.appendChild(postElement);
     });
 }
@@ -211,7 +212,7 @@ async function showPostAndComments(postId) {
     let postData = null;
     try {
         const response = await fetch(`/api/posts/${postId}`, {
-            headers: { 'Authorization': `Bearer ${userToken}` }
+            headers: { 'Authorization': `${userToken}` }
         });
         postData = await handleAuthResponse(response);
     } catch (error) {
@@ -227,7 +228,7 @@ async function showPostAndComments(postId) {
     
     const post = postData.post;
     const comments = postData.comments;
-
+    comments.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
     let commentsHtml = '';
     if (comments.length === 0) {
         commentsHtml = '<p>No comments yet.</p>';
@@ -483,9 +484,9 @@ async function handleCreatePost(event) {
         document.getElementById('title').value = '';
         document.getElementById('post-content').value = '';
         document.querySelectorAll('#category-checkboxes input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
-        ws.send(JSON.stringify({ type: 'new_post', payload: postData }));
         displayPosts();
         hideCreatePostModal();
+        ws.send(JSON.stringify({ type: 'new_post', payload: postData }));
     } else {
         alert(data.error);
     }
@@ -504,7 +505,7 @@ async function handleAddComment(e, postId) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${userToken}`
+            'Authorization': `${userToken}`
         },
         body: JSON.stringify(commentData)
     });

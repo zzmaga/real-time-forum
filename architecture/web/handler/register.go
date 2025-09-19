@@ -8,11 +8,17 @@ import (
 )
 
 // Go отдаёт JSON ({status: "ok", user: {...}}), JS меняет DOM
-
+// Потом когда эррор хэндлинг до конца будет сделан
+// бэк будет передавать статус код ошибки и в нетворке
+// фронт будет показывать его
 // SignInHandler - POST /api/signin
 func (m *MainHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"error":   "Method not Allowed",
+		})
+		//http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -21,22 +27,43 @@ func (m *MainHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
-		return
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"token":   "",
+			"error":   "invalid request body",
+		})
+		//http.Error(w, "invalid request body", http.StatusBadRequest)
+		//return
 	}
 	usr, err := m.service.User.GetByNicknameOrEmail(creds.Login)
 	if err != nil {
-		http.Error(w, "user not found", http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"token":   "",
+			"error":   "user not found",
+		})
 		return
+		//http.Error(w, "user not found", http.StatusUnauthorized)
+		//return
 	}
 	ok, err := usr.CompareHashAndPassword(creds.Password)
 	if err != nil || !ok {
-		http.Error(w, "invalid password", http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"token":   "",
+			"error":   "invalid credentials",
+		})
 		return
+		//http.Error(w, "invalid password", http.StatusUnauthorized)
+		//return
 	}
 	session, err := m.service.Session.Record(usr.ID)
 	if err != nil {
-		http.Error(w, "could not create session", http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"token":   "",
+			"error":   "failed to create a record",
+		})
 		return
 	}
 	// куку ставим, чтобы JS мог узнать, что пользователь залогинен
@@ -60,7 +87,11 @@ func (m *MainHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 func (m *MainHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"error":   "Method not Allowed",
+		})
+		//http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
 	var newUserRequest struct {

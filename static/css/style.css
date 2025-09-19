@@ -67,6 +67,15 @@ button[type="submit"]:hover, #create-post-btn:hover {
     background-color: #000000;
 }
 
+#create-post-form textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  resize: both; 
+  overflow: auto;
+}
+
+
 #main-content {
     padding: 20px;
 }
