@@ -93,6 +93,30 @@ func migrate(db *sql.DB) error {
 			FOREIGN KEY(sender_id) REFERENCES users(id) ON DELETE CASCADE,
 			FOREIGN KEY(recipient_id) REFERENCES users(id) ON DELETE CASCADE
 		);`,
+		// post_votes
+		`CREATE TABLE IF NOT EXISTS post_votes (
+			id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+			post_id INTEGER NOT NULL,
+			user_id INTEGER NOT NULL,
+			vote INTEGER NOT NULL CHECK(vote IN (-1, 1)),
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE,
+			FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+			UNIQUE(post_id, user_id)
+		);`,
+		// post_comment_votes
+		`CREATE TABLE IF NOT EXISTS post_comment_votes (
+			id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+			comment_id INTEGER NOT NULL,
+			user_id INTEGER NOT NULL,
+			vote INTEGER NOT NULL CHECK(vote IN (-1, 1)),
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY(comment_id) REFERENCES post_comments(id) ON DELETE CASCADE,
+			FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+			UNIQUE(comment_id, user_id)
+		);`,
 	}
 
 	for _, q := range stmts {
