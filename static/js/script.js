@@ -63,6 +63,7 @@ function connectWebSocket() {
         }
     } else if (message.type === 'private_message') {
         // ...
+        handleIncomingPrivateMessage(message);
     }
 };
 
@@ -290,44 +291,54 @@ async function fetchUsers() {
     const usersList = document.getElementById('users-online-list');
     usersList.innerHTML = '';
     
-    // для примера. А так будем делать запрос 
-    const dummyUsers = [
-        { id: 2, nickname: 'Alice', is_online: true, last_message: { content: 'Hey, are you there?' } },
-        { id: 3, nickname: 'Bob', is_online: false, last_message: { content: 'See you later!' } },
-        { id: 4, nickname: 'Charlie', is_online: true },
-        { id: 5, nickname: 'David', is_online: true },
-        { id: 6, nickname: 'Eve', is_online: false },
-    ];
-    dummyUsers.sort((a, b) => {
-        if (a.last_message && b.last_message) {
-            // нужна сортировка по времени
-            return 0; 
-        }
-        if (a.last_message) return -1;
-        if (b.last_message) return 1;
-        return a.nickname.localeCompare(b.nickname);
-    });
-
-    dummyUsers.forEach(user => {
-        const userElement = document.createElement('div');
-        userElement.className = 'user-item';
-        userElement.dataset.userId = user.id;
-
-        const statusDot = user.is_online ? '<span class="status-dot online"></span>' : '<span class="status-dot offline"></span>';
-        const lastMessageHtml = user.last_message ? `<div class="last-message-preview">${user.last_message.content}</div>` : '';
-
-        userElement.innerHTML = `
-            ${statusDot}
-            <span class="user-nickname">${user.nickname}</span>
-            ${lastMessageHtml}
-        `;
+    try {
+        const response = await fetch('/api/users', {
+            method: 'GET',
+            headers: { 'Authorization': `${userToken}` }
+        });
         
-        userElement.addEventListener('click', () => {
-            selectUserForChat(user.id, user.nickname);
+        if (!response.ok) {
+            throw new Error('Failed to fetch users');
+        }
+        
+        const users = await response.json();
+        
+        // Sort users by last message time or alphabetically
+        users.sort((a, b) => {
+            // For now, just sort alphabetically since we don't have last message info yet
+            return a.nickname.localeCompare(b.nickname);
         });
 
-        usersList.appendChild(userElement);
-    });
+        users.forEach(user => {
+            const userElement = document.createElement('div');
+            userElement.className = 'user-item';
+            userElement.dataset.userId = user.id;
+
+            // Check if user is online (connected via WebSocket)
+            const isOnline = checkUserOnlineStatus(user.id);
+            const statusDot = isOnline ? '<span class="status-dot online"></span>' : '<span class="status-dot offline"></span>';
+
+            userElement.innerHTML = `
+                ${statusDot}
+                <span class="user-nickname">${user.nickname}</span>
+            `;
+            
+            userElement.addEventListener('click', () => {
+                selectUserForChat(user.id, user.nickname);
+            });
+
+            usersList.appendChild(userElement);
+        });
+    } catch (error) {
+        console.error('Failed to fetch users:', error);
+        usersList.innerHTML = '<p>Failed to load users</p>';
+    }
+}
+
+function checkUserOnlineStatus(userId) {
+    // This would need to be implemented with a global list of online users
+    // For now, return false as we don't have this implemented yet
+    return false;
 }
 
 async function selectUserForChat(userId, nickname) {
@@ -337,31 +348,92 @@ async function selectUserForChat(userId, nickname) {
     chatForm.style.display = 'flex';
     chatForm.dataset.recipientId = userId;
     
-    // Placeholder to fetch messages
-    // You will need a new API endpoint in your Go backend to fetch chat history.
-    const dummyMessages = [
-        { senderId: 1, content: 'Hi, how are you?', created_at: '2025-09-05T10:00:00Z' },
-        { senderId: userId, content: 'I am doing great, thanks!', created_at: '2025-09-05T10:01:00Z' },
-    ];
-    
-    dummyMessages.forEach(msg => {
-        const messageElement = document.createElement('div');
-        messageElement.className = `chat-message ${msg.senderId === 1 ? 'sent' : 'received'}`;
+    // Fetch messages from the API
+    try {
+        const response = await fetch('/api/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${userToken}`
+            },
+            body: JSON.stringify({
+                recipient_id: userId,
+                offset: 0,
+                limit: 10
+            })
+        });
         
-        const messageDate = new Date(msg.created_at).toLocaleString();
+        if (response.ok) {
+            const messages = await response.json();
+            
+            // Reverse messages to show oldest first
+            messages.reverse().forEach(msg => {
+                const messageElement = document.createElement('div');
+                const isSent = msg.sender_id === getCurrentUserId(); // We need to get current user ID
+                messageElement.className = `chat-message ${isSent ? 'sent' : 'received'}`;
+                
+                const messageDate = new Date(msg.created_at).toLocaleString();
 
-        messageElement.innerHTML = `
-            <div class="message-header">
-                <span class="message-author">${msg.senderId === 1 ? 'You' : nickname}</span>
-                <span class="message-date">${messageDate}</span>
-            </div>
-            <p>${msg.content}</p>
-        `;
-        messagesContainer.appendChild(messageElement);
-    });
+    //             messageElement.innerHTML = `
+    //         <div class="message-header">
+    //             <span class="message-author">${msg.senderId === 1 ? 'You' : nickname}</span>
+    //             <span class="message-date">${messageDate}</span>
+    //         </div>
+    //         <p>${msg.content}</p>
+    //     `;
+    //     messagesContainer.appendChild(messageElement);
+    // });
+
+                messageElement.innerHTML = `
+                    <div class="message-header">
+                        <span class="message-author">${isSent ? 'You' : msg.sender_nickname}</span>
+                        <span class="message-date">${messageDate}</span>
+                    </div>
+                    <p>${msg.content}</p>
+                `;
+                messagesContainer.appendChild(messageElement);
+            });
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        } else {
+            messagesContainer.innerHTML += '<p>Failed to load messages</p>';
+        }
+    } catch (error) {
+        console.error('Failed to fetch messages:', error);
+        messagesContainer.innerHTML += '<p>Failed to load messages</p>';
+    }
     
     // Add event listener for the chat form
     chatForm.addEventListener('submit', handleSendMessage);
+}
+
+function getCurrentUserId() {
+    // This should be stored when user logs in
+    // For now, return a placeholder
+    return 1;
+}
+
+function handleIncomingPrivateMessage(message) {
+    const messagesContainer = document.getElementById('messages-container');
+    if (!messagesContainer) return; // Not on chat page
+    
+    const payload = message.payload;
+    const messageElement = document.createElement('div');
+    messageElement.className = 'chat-message received';
+    
+    const messageDate = new Date(payload.created_at).toLocaleString();
+    
+    messageElement.innerHTML = `
+        <div class="message-header">
+            <span class="message-author">${payload.sender_name}</span>
+            <span class="message-date">${messageDate}</span>
+        </div>
+        <p>${payload.content}</p>
+    `;
+    
+    messagesContainer.appendChild(messageElement);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 function renderErrorPage() {

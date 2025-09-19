@@ -110,15 +110,25 @@ func (m *MainHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	// Parse age from date string
+	age := 0
+	if newUserRequest.Age != "" {
+		birthDate, err := time.Parse("2006-01-02", newUserRequest.Age)
+		if err == nil {
+			age = int(time.Since(birthDate).Hours() / 24 / 365.25)
+		}
+	}
+
 	newUser := &models.User{
 		Nickname:  newUserRequest.Nickname,
 		FirstName: newUserRequest.FirstName,
 		LastName:  newUserRequest.LastName,
-		Age:       10,
+		Age:       age,
 		Gender:    newUserRequest.Gender,
 		Email:     newUserRequest.Email,
 		Password:  newUserRequest.Password,
 		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 	_, err := m.service.User.Create(newUser)
 	if err != nil {

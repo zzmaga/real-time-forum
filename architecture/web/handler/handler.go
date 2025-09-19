@@ -37,8 +37,11 @@ func (m *MainHandler) InitRoutes() http.Handler {
 
 	mux.HandleFunc("/api/posts", m.PostsHandler)
 	mux.HandleFunc("/api/posts/", m.ViewPostHandler)
+	mux.HandleFunc("/api/comments", m.CommentsHandler)
 
 	mux.HandleFunc("/api/messages", m.MessagesHandler) // WebSocket или JSON
+	mux.HandleFunc("/api/users", m.UsersHandler)
+	mux.HandleFunc("/ws", m.WebSocketHandler)
 
 	return mux
 }

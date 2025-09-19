@@ -8,6 +8,7 @@ import (
 	"real-time-forum/architecture/service/post_comment"
 	"real-time-forum/architecture/service/post_comment_vote"
 	"real-time-forum/architecture/service/post_vote"
+	"real-time-forum/architecture/service/private_message"
 	"real-time-forum/architecture/service/session"
 	"real-time-forum/architecture/service/user"
 )
@@ -19,6 +20,7 @@ type Service struct {
 	Category        models.CategoryService
 	PostComment     models.PostCommentService
 	PostCommentVote models.PostCommentVoteService
+	PrivateMessage  models.PrivateMessageService
 	Session         models.SessionService
 }
 
@@ -30,6 +32,7 @@ func NewService(repo *repository.Repository) *Service {
 		Category:        category.NewPostCategoryService(repo.Category),
 		PostComment:     post_comment.NewPostCommentService(repo.PostComment),
 		PostCommentVote: post_comment_vote.NewPostCommentVoteService(repo.PostCommentVote),
+		PrivateMessage:  private_message.NewPrivateMessageService(repo.PrivateMessage),
 		Session:         session.NewSessionService(repo.Session),
 	}
 }
