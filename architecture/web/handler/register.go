@@ -32,8 +32,7 @@ func (m *MainHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 			"token":   "",
 			"error":   "invalid request body",
 		})
-		//http.Error(w, "invalid request body", http.StatusBadRequest)
-		//return
+		return
 	}
 	usr, err := m.service.User.GetByNicknameOrEmail(creds.Login)
 	if err != nil {
@@ -119,6 +118,15 @@ func (m *MainHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Basic validation
+	if newUserRequest.Nickname == "" || newUserRequest.Email == "" || newUserRequest.Password == "" {
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"error":   "Nickname, email and password are required",
+		})
+		return
+	}
+
 	newUser := &models.User{
 		Nickname:  newUserRequest.Nickname,
 		FirstName: newUserRequest.FirstName,
@@ -150,5 +158,56 @@ func (m *MainHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 а если SignUp и является регистрацией
 */
 func (m *MainHandler) SignOutHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"error":   "Method not Allowed",
+		})
+		return
+	}
 
+	// Get session from cookie
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"error":   "No active session",
+		})
+		return
+	}
+
+	// Get session by UUID first
+	session, err := m.service.Session.GetByUuid(cookie.Value)
+	if err != nil {
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"error":   "Session not found",
+		})
+		return
+	}
+
+	// Delete session from database
+	err = m.service.Session.Delete(session.ID)
+	if err != nil {
+		json.NewEncoder(w).Encode(map[string]any{
+			"success": false,
+			"error":   "Failed to delete session",
+		})
+		return
+	}
+
+	// Clear cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_id",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+	})
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"success": true,
+		"message": "Successfully signed out",
+	})
 }
