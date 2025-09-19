@@ -202,7 +202,7 @@ async function displayPosts() {
 
         // Add the click event listener to the title
         postElement.querySelector('.post-title').addEventListener('click', () => {
-            showPostAndComments(post.id);
+            navigate(`#/posts/${post.Id}`);
         });
         postsContainer.appendChild(postElement);
     });
@@ -213,6 +213,7 @@ async function showPostAndComments(postId) {
     try {
         const response = await fetch(`/api/posts/${postId}`, {
             headers: { 'Authorization': `${userToken}` }
+            //body: JSON.stringify(postId)
         });
         postData = await handleAuthResponse(response);
     } catch (error) {
@@ -372,7 +373,13 @@ function renderErrorPage() {
 }
 
 function renderPage(path) {
+    const postIdMatch = path.match(/^#\/posts\/(\d+)$/);
     if (isLoggedIn()) {
+        if (postIdMatch) {
+            const postId = postIdMatch[1];
+            showPostAndComments(postId);
+            return;
+        }
         switch (path) {
             case '#/login':
             case '#/register':

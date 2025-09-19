@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"real-time-forum/architecture/models"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -88,4 +90,36 @@ func (m *MainHandler) CreatePostHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "Post created successfully"})
+}
+
+func (m *MainHandler) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	_, err := m.service.Session.GetByUuid(authHeader)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	postId, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/api/posts/"))
+	if err != nil {
+		http.Error(w, "Incorrect id", http.StatusBadRequest)
+		return
+	}
+	post, err := m.service.Post.GetByID(int64(postId))
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+	// repository GetAllByPostID не работает
+	// У нас таблицы нет postcomments в дбшке
+	comments, err := m.service.PostComment.GetAllByPostID(int64(postId), 0, 0)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{"success": true, "post": post, "comments": comments})
 }

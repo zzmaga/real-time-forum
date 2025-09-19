@@ -10,8 +10,9 @@ func (c *PostCommentService) GetAllByPostID(postId, offset, limit int64) ([]*mod
 	comments, err := c.repo.GetAllByPostID(postId, offset, limit)
 	switch {
 	case err == nil:
+		return comments, nil
 	case err != nil:
 		return nil, fmt.Errorf("c.repo.GetAllByPostID: %w", err)
 	}
-	return comments, nil
+	return nil, fmt.Errorf("unknown error")
 }

@@ -11,17 +11,14 @@ func (c *PostCommentRepo) GetAllByPostID(postId, offset, limit int64) ([]*models
 	if limit == 0 {
 		limit = -1
 	}
-
 	rows, err := c.db.Query(`
 SELECT id, content, user_id, post_id, created_at FROM posts_comments
 WHERE post_id = ?
 LIMIT ? OFFSET ? 
 	`, postId, limit, offset)
-
 	if err != nil {
 		return nil, fmt.Errorf("p.db.Query: %w", err)
 	}
-
 	comments := []*models.PostComment{}
 	for rows.Next() {
 		var strCreatedAt string

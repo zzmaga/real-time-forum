@@ -36,6 +36,7 @@ func (m *MainHandler) InitRoutes() http.Handler {
 	mux.HandleFunc("/api/signout", m.SignOutHandler)
 
 	mux.HandleFunc("/api/posts", m.PostsHandler)
+	mux.HandleFunc("/api/posts/", m.ViewPostHandler)
 
 	mux.HandleFunc("/api/messages", m.MessagesHandler) // WebSocket или JSON
 
