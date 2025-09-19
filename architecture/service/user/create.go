@@ -20,6 +20,7 @@ func (u *UserService) Create(user *models.User) (int64, error) {
 	}
 
 	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
 	userId, err := u.repo.Create(user)
 
 	switch {
