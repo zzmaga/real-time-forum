@@ -234,27 +234,36 @@ async function showPostAndComments(postId) {
     if (comments.length === 0) {
         commentsHtml = '<p>No comments yet.</p>';
     } else {
-        comments.forEach(comment => {
+       comments.forEach(comment => {
             commentsHtml += `
-                <div class="comment">
-                    <p><strong>${comment.Author}</strong> on ${new Date(comment.CreatedAt).toLocaleString()}</p>
-                    <p>${comment.Content}</p>
+                <div class="comment-card">
+                    <div class="comment-header">
+                        <p class="comment-author"><strong>${comment.Author}</strong></p>
+                        <p class="comment-date">${new Date(comment.CreatedAt).toLocaleString()}</p>
+                    </div>
+                    <div class="comment-body">
+                        <p>${comment.Content}</p>
+                    </div>
                 </div>
             `;
         });
     }
 
     mainContent.innerHTML = `
-        <div class="single-post-container">
-            <h2>${post.Title}</h2>
-            <p>${post.Content}</p>
-            <small>By: ${post.Author} | Categories: ${Array.isArray(post.Category) ? post.Category.join(', ') : post.Category}</small>
-            <hr>
-            <div id="comments-section">
-                <h3>Comments</h3>
-                ${commentsHtml}
+        <div class="centered-container">
+            <div class="single-post-container">
+                <div class="post-content-section">
+                    <h2>${post.Title}</h2>
+                    <p>${post.Content}</p>
+                    <small>By: ${post.Author} | Categories: ${Array.isArray(post.Category) ? post.Category.join(', ') : post.Category}</small>
+                </div>
+                <hr>
+                <div id="comments-section">
+                    <h3>Comments</h3>
+                    ${commentsHtml}
+                </div>
             </div>
-            <form id="add-comment-form">
+            <form id="add-comment-form" class="comment-form-container">
                 <textarea id="comment-content" placeholder="Write a comment..." required></textarea>
                 <button type="submit">Send Comment</button>
             </form>

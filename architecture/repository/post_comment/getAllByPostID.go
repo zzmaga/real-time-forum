@@ -12,7 +12,7 @@ func (c *PostCommentRepo) GetAllByPostID(postId, offset, limit int64) ([]*models
 		limit = -1
 	}
 	rows, err := c.db.Query(`
-SELECT id, content, user_id, post_id, created_at FROM posts_comments
+SELECT id, content, user_id, post_id, created_at FROM post_comments
 WHERE post_id = ?
 LIMIT ? OFFSET ? 
 	`, postId, limit, offset)
