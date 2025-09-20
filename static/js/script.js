@@ -253,21 +253,23 @@ async function showPostAndComments(postId) {
     mainContent.innerHTML = `
         <div class="centered-container">
             <div class="single-post-container">
+            
                 <div class="post-content-section">
                     <h2>${post.Title}</h2>
                     <p>${post.Content}</p>
                     <small>By: ${post.Author} | Categories: ${Array.isArray(post.Category) ? post.Category.join(', ') : post.Category}</small>
                 </div>
                 <hr>
+                <form id="add-comment-form" class="comment-form-container">
+                <textarea id="comment-content" placeholder="Write a comment..." required></textarea>
+                <button type="submit">Send Comment</button>
+            </form>
                 <div id="comments-section">
                     <h3>Comments</h3>
                     ${commentsHtml}
                 </div>
             </div>
-            <form id="add-comment-form" class="comment-form-container">
-                <textarea id="comment-content" placeholder="Write a comment..." required></textarea>
-                <button type="submit">Send Comment</button>
-            </form>
+            
         </div>
     `;
     
@@ -585,7 +587,7 @@ async function handleAddComment(e, postId) {
     const commentContent = document.getElementById('comment-content').value;
 
     const commentData = {
-        post_id: postId,
+        post_id: parseInt(postId, 10),
         content: commentContent
     };
 

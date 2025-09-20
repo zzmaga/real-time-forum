@@ -377,6 +377,7 @@ button[type="submit"]:hover, #create-post-btn:hover {
 }
 
 .comment-card {
+    max-width: 95%;
     background-color: #f9f9f9;
 }
 

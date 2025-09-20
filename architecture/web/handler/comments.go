@@ -48,7 +48,6 @@ func (m *MainHandler) CreateCommentHandler(w http.ResponseWriter, r *http.Reques
 		Content:   commentData.Content,
 		CreatedAt: time.Now(),
 	}
-
 	_, err = m.service.PostComment.Create(newComment)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
