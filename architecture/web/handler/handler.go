@@ -37,7 +37,7 @@ func (m *MainHandler) InitRoutes() http.Handler {
 
 	mux.HandleFunc("/api/posts", m.PostsHandler)
 	mux.HandleFunc("/api/posts/", m.ViewPostHandler)
-	mux.HandleFunc("/api/posts/vote/", m.PostVoteHandler)
+	mux.HandleFunc("/api/posts/vote", m.PostVoteHandler)
 	mux.HandleFunc("/api/comments", m.CommentsHandler)
 	mux.HandleFunc("/api/comments/vote/", m.CommentVoteHandler)
 	mux.HandleFunc("/api/categories", m.CategoriesHandler)

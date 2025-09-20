@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"real-time-forum/architecture/models"
 	"strconv"
@@ -42,6 +43,13 @@ func (m *MainHandler) DisplayPostsHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
+	}
+	for i := 0; i < len(posts); i++ {
+		posts[i].WVoteUp, posts[i].WVoteDown, err = m.service.PostVote.GetByPostID(posts[i].Id)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 	}
 	// Мне нужно имя автора и потом категории
 	// Могу сам добавить или ты. Думаю ты можешь создать стракт в GetAll
@@ -87,7 +95,6 @@ func (m *MainHandler) CreatePostHandler(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-
 	// Add categories to post
 	if len(postData.Category) > 0 {
 		err = m.service.Category.AddToPostByNames(postData.Category, postID)
@@ -265,6 +272,7 @@ func (m *MainHandler) CreatePostVoteHandler(w http.ResponseWriter, r *http.Reque
 
 	err := m.service.PostVote.Record(vote)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -274,15 +282,17 @@ func (m *MainHandler) CreatePostVoteHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (m *MainHandler) DeletePostVoteHandler(w http.ResponseWriter, r *http.Request, userID int64) {
-	postIDStr := strings.TrimPrefix(r.URL.Path, "/api/posts/vote/")
-	postID, err := strconv.ParseInt(postIDStr, 10, 64)
-	if err != nil {
-		http.Error(w, "invalid post ID", http.StatusBadRequest)
+	var voteData struct {
+		PostID int64 `json:"post_id"`
+	}
+	// отправлять post_id просто по айпишке будет намного
+	if err := json.NewDecoder(r.Body).Decode(&voteData); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	// Get user's vote for this post
-	vote, err := m.service.PostVote.GetPostUserVote(userID, postID)
+	vote, err := m.service.PostVote.GetPostUserVote(userID, voteData.PostID)
 	if err != nil {
 		http.Error(w, "vote not found", http.StatusNotFound)
 		return

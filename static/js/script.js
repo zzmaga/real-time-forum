@@ -193,17 +193,22 @@ async function displayPosts() {
     posts.forEach(post => {
         const postElement = document.createElement('div');
         postElement.className = 'post-card';
-        const categories = Array.isArray(post.category) ? post.category.join(', ') : post.category;
+        const categories = Array.isArray(post.WCategories) ? post.WCategories.join(', ') : post.WCategories;
         
         postElement.innerHTML = `
             <h3 class="post-title" style="cursor: pointer;">${post.Title}</h3>
             <p>${post.Content}</p>
-            <small>By: ${post.author} | Categories: ${categories}</small>
+            <small>By: ${post.WUser} | Categories: ${categories}</small>
+            <div class="post-actions">
+                <button class="vote-btn" data-post-id="${post.Id}" data-vote-type="1">👍 <span class="like-count">${post.WVoteUp}</span></button>
+                <button class="vote-btn" data-post-id="${post.Id}" data-vote-type="-1">👎 <span class="dislike-count">${post.WVoteDown}</span></button>
+            </div>
         `;
-
-        // Add the click event listener to the title
         postElement.querySelector('.post-title').addEventListener('click', () => {
             navigate(`#/posts/${post.Id}`);
+        });
+        postElement.querySelectorAll('.vote-btn').forEach(button => {
+            button.addEventListener('click', handleVote);
         });
         postsContainer.appendChild(postElement);
     });
@@ -647,6 +652,48 @@ async function handleAddComment(e, postId) {
         `;
         messagesContainer.appendChild(messageElement);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+}
+
+async function handleVote(event) {
+    const button = event.currentTarget;
+    const postId = button.dataset.postId;
+    const voteType = parseInt(button.dataset.voteType, 10);
+    const isCurrentlyVoted = button.classList.contains('active-vote');
+    const bodyData = {
+        post_id: parseInt(postId, 10),
+        vote: parseInt(voteType, 10),
+    };
+
+    let method;
+    let url = '/api/posts/vote';
+
+    if (isCurrentlyVoted) {
+        method = 'DELETE';
+    } else {
+        method = 'POST';
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${userToken}`
+            },
+            body: JSON.stringify(bodyData)
+        });
+
+        const data = await handleAuthResponse(response);
+        if (data.success) {
+            console.log('Vote action successful. Reloading posts to update counts.');
+            displayPosts();
+        } else {
+            alert(data.error || 'Failed to handle vote.');
+        }
+    } catch (error) {
+        console.error('Failed to handle vote:', error);
+        alert('An error occurred while voting.');
     }
 }
 

@@ -5,8 +5,8 @@ import "fmt"
 func (p *PostVoteRepo) GetByPostID(postId int64) (int64, int64, error) {
 	row := p.db.QueryRow(`
 SELECT 
-	(SELECT COUNT(vote) FROM posts_votes WHERE post_id = ? AND vote == 1) as up,
-    (SELECT COUNT(vote) FROM posts_votes WHERE post_id = ? AND vote == -1) as down;
+	(SELECT COUNT(vote) FROM post_votes WHERE post_id = ? AND vote == 1) as up,
+    (SELECT COUNT(vote) FROM post_votes WHERE post_id = ? AND vote == -1) as down;
 	`, postId, postId)
 
 	var up, down int64

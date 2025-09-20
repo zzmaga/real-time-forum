@@ -10,7 +10,7 @@ import (
 func (p *PostVoteRepo) Create(vote *models.PostVote) (int64, error) {
 	strCreatedAt := vote.CreatedAt.Format(models.TimeFormat)
 	row := p.db.QueryRow(`
-INSERT INTO posts_votes (vote, user_id, post_id, created_at, updated_at) VALUES
+INSERT INTO post_votes (vote, user_id, post_id, created_at, updated_at) VALUES
 (?, ?, ?, ?, ?) RETURNING id`, vote.Vote, vote.UserId, vote.PostId, strCreatedAt, strCreatedAt)
 
 	err := row.Scan(&vote.Id)
