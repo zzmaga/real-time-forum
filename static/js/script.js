@@ -172,7 +172,6 @@ async function displayPosts() {
     const postsContainer = document.getElementById('posts-container');
     postsContainer.innerHTML = '';
     let posts = null;
-    console.log(userToken);
     try {
         const response = await fetch('/api/posts', {
             method: 'GET',
@@ -181,45 +180,51 @@ async function displayPosts() {
         posts = await handleAuthResponse(response);
     } catch (error) {
         console.error('Failed to fetch posts:', error);
-        posts = []; // Treat the error as an empty list of posts
+        posts = [];
     }
-
     if (!posts || posts.length === 0) {
         postsContainer.innerHTML = '<p>No posts yet. Be the first to post!</p>';
         return;
     }
-    posts.sort((a, b) => new Date(b.CreatedAt)- new Date(a.CreatedAt));
-    console.log(posts);
+    posts.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
     posts.forEach(post => {
         const postElement = document.createElement('div');
         postElement.className = 'post-card';
         const categories = Array.isArray(post.WCategories) ? post.WCategories.join(', ') : post.WCategories;
-        
-        postElement.innerHTML = `
-            <h3 class="post-title" style="cursor: pointer;">${post.Title}</h3>
-            <p>${post.Content}</p>
-            <small>By: ${post.WUser} | Categories: ${categories}</small>
-            <div class="post-actions">
-                <button class="vote-btn" data-post-id="${post.Id}" data-vote-type="1">👍 <span class="like-count">${post.WVoteUp}</span></button>
-                <button class="vote-btn" data-post-id="${post.Id}" data-vote-type="-1">👎 <span class="dislike-count">${post.WVoteDown}</span></button>
-            </div>
+        const titleElement = document.createElement('h3');
+        titleElement.className = 'post-title';
+        titleElement.style.cursor = 'pointer';
+        titleElement.textContent = post.Title;
+        const contentElement = document.createElement('p');
+        contentElement.textContent = post.Content;
+        const smallElement = document.createElement('small');
+        smallElement.textContent = `By: ${post.WUser} | Categories: ${categories}`;
+        const actionsElement = document.createElement('div');
+        actionsElement.className = 'post-actions';
+        actionsElement.innerHTML = `
+            <button class="vote-btn" data-post-id="${post.Id}" data-vote-type="1">👍 <span class="like-count">${post.WVoteUp}</span></button>
+            <button class="vote-btn" data-post-id="${post.Id}" data-vote-type="-1">👎 <span class="dislike-count">${post.WVoteDown}</span></button>
         `;
-        postElement.querySelector('.post-title').addEventListener('click', () => {
+        postElement.appendChild(titleElement);
+        postElement.appendChild(contentElement);
+        postElement.appendChild(smallElement);
+        postElement.appendChild(actionsElement);
+        titleElement.addEventListener('click', () => {
             navigate(`#/posts/${post.Id}`);
         });
-        postElement.querySelectorAll('.vote-btn').forEach(button => {
+        actionsElement.querySelectorAll('.vote-btn').forEach(button => {
             button.addEventListener('click', handleVote);
         });
         postsContainer.appendChild(postElement);
     });
 }
 
+
 async function showPostAndComments(postId) {
     let postData = null;
     try {
         const response = await fetch(`/api/posts/${postId}`, {
             headers: { 'Authorization': `${userToken}` }
-            //body: JSON.stringify(postId)
         });
         postData = await handleAuthResponse(response);
     } catch (error) {
@@ -229,26 +234,27 @@ async function showPostAndComments(postId) {
     }
 
     if (!postData || !postData.success) {
-        mainContent.innerHTML = `<p>${postData.error || 'Failed to load post.'}</p>`;
+        mainContent.innerHTML = `<p>${escapeHTML(postData?.error) || 'Failed to load post.'}</p>`;
         return;
     }
     
     const post = postData.post;
     const comments = postData.comments;
     comments.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
+
     let commentsHtml = '';
     if (comments.length === 0) {
         commentsHtml = '<p>No comments yet.</p>';
     } else {
-       comments.forEach(comment => {
+        comments.forEach(comment => {
             commentsHtml += `
                 <div class="comment-card">
                     <div class="comment-header">
-                        <p class="comment-author"><strong>${comment.Author}</strong></p>
+                        <p class="comment-author"><strong>${escapeHTML(comment.Author)}</strong></p>
                         <p class="comment-date">${new Date(comment.CreatedAt).toLocaleString()}</p>
                     </div>
                     <div class="comment-body">
-                        <p>${comment.Content}</p>
+                        <p>${escapeHTML(comment.Content)}</p>
                     </div>
                 </div>
             `;
@@ -258,27 +264,33 @@ async function showPostAndComments(postId) {
     mainContent.innerHTML = `
         <div class="centered-container">
             <div class="single-post-container">
-            
                 <div class="post-content-section">
-                    <h2>${post.Title}</h2>
-                    <p>${post.Content}</p>
-                    <small>By: ${post.Author} | Categories: ${Array.isArray(post.Category) ? post.Category.join(', ') : post.Category}</small>
+                    <h2>${escapeHTML(post.Title)}</h2>
+                    <p>${escapeHTML(post.Content)}</p>
+                    <small>
+                        By: ${escapeHTML(post.Author)} | 
+                        Categories: ${
+                            Array.isArray(post.Category) 
+                                ? post.Category.map(c => escapeHTML(c)).join(', ') 
+                                : escapeHTML(post.Category)
+                        }
+                    </small>
                 </div>
                 <hr>
                 <form id="add-comment-form" class="comment-form-container">
-                <textarea id="comment-content" placeholder="Write a comment..." required></textarea>
-                <button type="submit">Send Comment</button>
-            </form>
+                    <textarea id="comment-content" placeholder="Write a comment..." required></textarea>
+                    <button type="submit">Send Comment</button>
+                </form>
                 <div id="comments-section">
                     <h3>Comments</h3>
                     ${commentsHtml}
                 </div>
             </div>
-            
         </div>
     `;
     
-    document.getElementById('add-comment-form').addEventListener('submit', (e) => handleAddComment(e, postId));
+    document.getElementById('add-comment-form')
+        .addEventListener('submit', (e) => handleAddComment(e, postId));
 }
 
 function renderChatsPage() {
@@ -301,6 +313,16 @@ function renderChatsPage() {
     `;
 
     fetchUsers();
+}
+
+function escapeHTML(str) {
+    if (typeof str !== 'string') return str;
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 async function fetchUsers() {
