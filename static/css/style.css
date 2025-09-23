@@ -423,3 +423,8 @@ button[type="submit"]:hover, #create-post-btn:hover {
 .comment-form-container button:hover {
     background-color: #000000;
 }
+
+.vote-btn.active-vote{
+    background-color: red;
+    color:#ffffff;
+}

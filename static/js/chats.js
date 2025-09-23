@@ -61,9 +61,9 @@ async function fetchUsers() {
         }
         
         const users = await response.json();
-        
+        console.log(users);
         users.sort((a, b) => a.nickname.localeCompare(b.nickname));
-
+        console.log(users);
         users.forEach(user => {
             const userElement = document.createElement('div');
             userElement.className = 'user-item';

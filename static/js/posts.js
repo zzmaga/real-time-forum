@@ -89,8 +89,8 @@ export async function displayPosts() {
         const actionsElement = document.createElement('div');
         actionsElement.className = 'post-actions';
         actionsElement.innerHTML = `
-            <button class="vote-btn" data-post-id="${post.Id}" data-vote-type="1">👍 <span class="like-count">${post.WVoteUp}</span></button>
-            <button class="vote-btn" data-post-id="${post.Id}" data-vote-type="-1">👎 <span class="dislike-count">${post.WVoteDown}</span></button>
+            <button class="vote-btn ${post.WUserVote == 1 ? 'active-vote' : ''}" data-post-id="${post.Id}" data-vote-type="1">👍 <span class="like-count">${post.WVoteUp}</span></button>
+            <button class="vote-btn ${post.WUserVote == -1 ? 'active-vote' : ''}" data-post-id="${post.Id}" data-vote-type="-1">👎 <span class="dislike-count">${post.WVoteDown}</span></button>
         `;
         postElement.appendChild(titleElement);
         postElement.appendChild(contentElement);
@@ -253,7 +253,6 @@ async function handleVote(event) {
 
     let method;
     let url = '/api/posts/vote';
-
     if (isCurrentlyVoted) {
         method = 'DELETE';
     } else {

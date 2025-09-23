@@ -34,7 +34,7 @@ func (m *MainHandler) DisplayPostsHandler(w http.ResponseWriter, r *http.Request
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-	_, err := m.service.Session.GetByUuid(authHeader)
+	session, err := m.service.Session.GetByUuid(authHeader)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
@@ -54,6 +54,19 @@ func (m *MainHandler) DisplayPostsHandler(w http.ResponseWriter, r *http.Request
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
+		}
+		postVote, err := m.service.PostVote.GetPostUserVote(session.UserID, posts[i].Id)
+		// Здесь или внутри функции надо проверять лайкал/дизлайкал ли юзер пост
+		// Если нет мы ноль возвращаем что значит у нас нет АКТИВНОЙ кнопки лайка/дизлайка
+		// Это нужно для фронта а еще понимать когда юзер хочет удалить воут если дважды нажал
+		if err != nil {
+			// временно сюда добавлю
+			posts[i].WUserVote = 0
+			//log.Println(err.Error())
+			//http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			//return
+		} else {
+			posts[i].WUserVote = postVote.Vote
 		}
 	}
 	// Мне нужно имя автора и потом категории

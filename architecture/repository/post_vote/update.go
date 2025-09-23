@@ -10,7 +10,7 @@ import (
 func (p *PostVoteRepo) Update(vote *models.PostVote) error {
 	strUpdatedAt := vote.UpdatedAt.Format(models.TimeFormat)
 	row := p.db.QueryRow(`
-UPDATE posts_votes
+UPDATE post_votes
 SET vote = ?, updated_at = ?
 WHERE user_id = ? AND post_id = ? 
 RETURNING id`, vote.Vote, strUpdatedAt, vote.UserId, vote.PostId)

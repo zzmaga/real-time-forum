@@ -16,7 +16,6 @@ func (r *PrivateMessageRepo) GetUsersWithMessages(userID int64) ([]*models.User,
 		AND u.id != ?
 		ORDER BY u.nickname
 	`
-
 	rows, err := r.db.Query(query, userID, userID, userID)
 	if err != nil {
 		return nil, err
@@ -35,6 +34,5 @@ func (r *PrivateMessageRepo) GetUsersWithMessages(userID int64) ([]*models.User,
 		}
 		users = append(users, user)
 	}
-
 	return users, nil
 }
