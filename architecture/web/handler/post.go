@@ -45,6 +45,11 @@ func (m *MainHandler) DisplayPostsHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 	for i := 0; i < len(posts); i++ {
+		posts[i].WUser, err = m.service.User.GetByID(posts[i].UserId)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 		posts[i].WVoteUp, posts[i].WVoteDown, err = m.service.PostVote.GetByPostID(posts[i].Id)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
