@@ -48,20 +48,29 @@ async function handleLogin(event) {
     event.preventDefault();
     const loginId = document.getElementById('login').value;
     const password = document.getElementById('password').value;
-    const response = await fetch('/api/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ loginId, password })
-    });
-    const data = await response.json();
-    if (data.success) {
-        localStorage.setItem('userToken', data.token);
-        window.userToken = data.token; // Update the global variable
-        updateNav();
-        navigate('#/posts');
-        connectWebSocket();
-    } else {
-        alert(data.error);
+    try {
+        const response = await fetch('/api/signin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ loginId, password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            localStorage.setItem('userToken', data.token);
+            const { setUserToken } = await import('./utils.js');
+            setUserToken(data.token);
+            
+            updateNav();
+            connectWebSocket();
+            navigate('#/posts');
+        } else {
+            alert(data.error);
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        alert('Login failed. Please try again.');
     }
 }
 

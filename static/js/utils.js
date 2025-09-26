@@ -31,13 +31,17 @@ export function updateNav() {
     }
 }
 
+export function setUserToken(token) {
+    userToken = token;
+}
+
 export function handleAuthResponse(response) {
     if (response.status === 401) {
         localStorage.removeItem('userToken');
         userToken = null;
         updateNav();
         navigate('#/login');
-        return;
+        return null;
     }
     return response.json();
 }
