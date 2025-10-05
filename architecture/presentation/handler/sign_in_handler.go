@@ -40,7 +40,7 @@ func (m *MainHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		//http.Error(w, "user not found", http.StatusUnauthorized)
 		//return
 	}
-	ok, err := user.CompareHashAndPassword(creds.Password)
+	ok, err := user.CompareHashAndPassword(usr, creds.Password)
 	if err != nil || !ok {
 		json.NewEncoder(w).Encode(map[string]any{
 			"success": false,
