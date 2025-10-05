@@ -240,17 +240,22 @@ async function handleAddComment(e, postId) {
         alert(data.error || 'Failed to add comment.');
     }
 }
+
+function getVoteCounts(postId) {
+    const postCard = document.querySelector(`.post-card .vote-btn[data-post-id="${postId}"]`).closest('.post-actions').parentElement;
+    const likeCountSpan = postCard.querySelector(`.vote-btn[data-vote-type="1"] .like-count`);
+    const dislikeCountSpan = postCard.querySelector(`.vote-btn[data-vote-type="-1"] .dislike-count`);
+    const likeButton = postCard.querySelector(`.vote-btn[data-vote-type="1"]`);
+    const dislikeButton = postCard.querySelector(`.vote-btn[data-vote-type="-1"]`);
+    return { likeCountSpan, dislikeCountSpan, likeButton, dislikeButton };
+}
     
 async function handleVote(event) {
     const button = event.currentTarget;
     const postId = button.dataset.postId;
     const voteType = parseInt(button.dataset.voteType, 10);
     const isCurrentlyVoted = button.classList.contains('active-vote');
-    const bodyData = {
-        post_id: parseInt(postId, 10),
-        vote: parseInt(voteType, 10),
-    };
-
+    const { likeCountSpan, dislikeCountSpan, likeButton, dislikeButton } = getVoteCounts(postId);
     let method;
     let url = '/api/posts/vote';
     if (isCurrentlyVoted) {
@@ -258,7 +263,10 @@ async function handleVote(event) {
     } else {
         method = 'POST';
     }
-
+    const bodyData = {
+        post_id: parseInt(postId, 10),
+        vote: method === 'DELETE' ? (voteType === 1 ? 1 : -1) : voteType,
+    };
     try {
         const response = await fetch(url, {
             method: method,
@@ -268,11 +276,24 @@ async function handleVote(event) {
             },
             body: JSON.stringify(bodyData)
         });
-
         const data = await handleAuthResponse(response);
         if (data.success) {
-            console.log('Vote action successful. Reloading posts to update counts.');
-            displayPosts();
+            console.log('Vote action successful. Updating counts.');
+            const payload = data.payload;
+            if (payload) {
+                likeCountSpan.textContent = payload.WVoteUp;
+                dislikeCountSpan.textContent = payload.WVoteDown;
+            }
+            if (isCurrentlyVoted) {
+                button.classList.remove('active-vote');
+            } else {
+                button.classList.add('active-vote');
+                if (voteType === 1) {
+                    dislikeButton.classList.remove('active-vote');
+                } else {
+                    likeButton.classList.remove('active-vote');
+                }
+            }
         } else {
             alert(data.error || 'Failed to handle vote.');
         }

@@ -114,6 +114,8 @@ func (m *MainHandler) CreatePostHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	// Add categories to post
+	log.Println(postData.Category)
+	log.Println(len(postData.Category))
 	if len(postData.Category) > 0 {
 		err = m.service.Category.AddToPostByNames(postData.Category, postID)
 		if err != nil {
@@ -169,7 +171,6 @@ func (m *MainHandler) GetPostHandler(w http.ResponseWriter, r *http.Request, pos
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "post": post, "comments": comments})
 }
@@ -294,9 +295,16 @@ func (m *MainHandler) CreatePostVoteHandler(w http.ResponseWriter, r *http.Reque
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-
+	voteUp, voteDown, err := m.service.PostVote.GetByPostID(voteData.PostID)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "Vote recorded"})
+	json.NewEncoder(w).Encode(map[string]any{
+		"success": true,
+		"message": "Vote recorded",
+		"payload": map[string]int64{
+			"WVoteUp":   voteUp,
+			"WVoteDown": voteDown,
+		},
+	})
 }
 
 func (m *MainHandler) DeletePostVoteHandler(w http.ResponseWriter, r *http.Request, userID int64) {
@@ -322,6 +330,14 @@ func (m *MainHandler) DeletePostVoteHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	voteUp, voteDown, err := m.service.PostVote.GetByPostID(voteData.PostID)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "Vote deleted"})
+	json.NewEncoder(w).Encode(map[string]any{
+		"success": true,
+		"message": "Vote deleted",
+		"payload": map[string]int64{
+			"WVoteUp":   voteUp,
+			"WVoteDown": voteDown,
+		},
+	})
 }
