@@ -3,15 +3,15 @@ package post_comment
 import (
 	"fmt"
 	"log"
-	"time"
-
 	"real-time-forum/architecture/models"
+	"strings"
+	"time"
 )
 
 func (c *PostCommentService) Create(comment *models.PostComment) (int64, error) {
-	comment.Prepare()
+	PrepareContent(comment)
 
-	if comment.ValidateContent() != nil {
+	if ValidateContent(comment) != nil {
 		return -1, ErrInvalidContentLength
 	}
 	comment.CreatedAt = time.Now()
@@ -23,4 +23,15 @@ func (c *PostCommentService) Create(comment *models.PostComment) (int64, error) 
 		return -1, fmt.Errorf("c.repo.Create: %w", err)
 	}
 	return commentId, nil
+}
+
+func ValidateContent(c *models.PostComment) error {
+	if lng := len(c.Content); lng < 1 || lng > 1000 {
+		return fmt.Errorf("content: invalid lenght (%d)", lng)
+	}
+	return nil
+}
+
+func PrepareContent(c *models.PostComment) {
+	c.Content = strings.Trim(c.Content, " ")
 }

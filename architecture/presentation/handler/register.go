@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"real-time-forum/architecture/models"
+	"real-time-forum/architecture/service/user"
 	"time"
 )
 
@@ -45,7 +46,7 @@ func (m *MainHandler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		//http.Error(w, "user not found", http.StatusUnauthorized)
 		//return
 	}
-	ok, err := usr.CompareHashAndPassword(creds.Password)
+	ok, err := user.CompareHashAndPassword(creds.Password)
 	if err != nil || !ok {
 		json.NewEncoder(w).Encode(map[string]any{
 			"success": false,

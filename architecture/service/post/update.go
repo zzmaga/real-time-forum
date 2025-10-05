@@ -7,11 +7,11 @@ import (
 )
 
 func (p *PostService) Update(post *models.Post) error {
-	post.Prepare()
+	Prepare(post)
 
-	if post.ValidateTitle() != nil {
+	if ValidateTitle(post) != nil {
 		return ErrInvalidTitleLength
-	} else if post.ValidateContent() != nil {
+	} else if ValidateContent(post) != nil {
 		return ErrInvalidContentLength
 	}
 

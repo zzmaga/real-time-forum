@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
+	"real-time-forum/architecture/presentation/handler"
 	"real-time-forum/architecture/repository"
 	"real-time-forum/architecture/service"
-	"real-time-forum/architecture/web/handler"
 	"real-time-forum/database"
 
 	_ "github.com/mattn/go-sqlite3"

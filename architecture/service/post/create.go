@@ -8,11 +8,11 @@ import (
 )
 
 func (p *PostService) Create(post *models.Post) (int64, error) {
-	post.Prepare()
+	Prepare(post)
 
-	if post.ValidateTitle() != nil {
+	if ValidateTitle(post) != nil {
 		return -1, ErrInvalidTitleLength
-	} else if post.ValidateContent() != nil {
+	} else if ValidateContent(post) != nil {
 		return -1, ErrInvalidContentLength
 	}
 

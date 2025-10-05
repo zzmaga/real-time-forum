@@ -1,14 +1,15 @@
-package models
+package user
 
 import (
 	"fmt"
 	"net/mail"
+	"real-time-forum/architecture/models"
 	"unicode"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (u *User) ValidateNickname() error {
+func ValidateNickname(u *models.User) error {
 	if lng := len([]rune(u.Nickname)); lng < 1 || 32 < lng {
 		return fmt.Errorf("nickname: invalid length (%d)", lng)
 	}
@@ -20,7 +21,7 @@ func (u *User) ValidateNickname() error {
 	return nil
 }
 
-func (u *User) ValidateEmail() error {
+func ValidateEmail(u *models.User) error {
 	if lng := len([]rune(u.Email)); lng < 1 || 320 < lng {
 		return fmt.Errorf("email: invalid length (%d)", lng)
 	}
@@ -31,7 +32,7 @@ func (u *User) ValidateEmail() error {
 	return nil
 }
 
-func (u *User) ValidatePassword() error {
+func ValidatePassword(u *models.User) error {
 	if len([]rune(u.Password)) < 8 {
 		return fmt.Errorf("password: too short")
 	}
@@ -51,14 +52,14 @@ func (u *User) ValidatePassword() error {
 	return nil
 }
 
-func (u *User) ValidateAge() error {
+func ValidateAge(u *models.User) error {
 	if u.Age < 0 || u.Age > 150 {
 		return fmt.Errorf("age: invalid value (%d), must be between 0 and 150", u.Age)
 	}
 	return nil
 }
 
-func (u *User) ValidateGender() error {
+func ValidateGender(u *models.User) error {
 	validGenders := []string{"male", "female", "other"}
 	for _, gender := range validGenders {
 		if u.Gender == gender {
@@ -68,7 +69,7 @@ func (u *User) ValidateGender() error {
 	return fmt.Errorf("gender: invalid value (%s), must be one of: male, female, other", u.Gender)
 }
 
-func (u *User) HashPassword() error {
+func HashPassword(u *models.User) error {
 	pass, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("bcrypt.GenerateFromPassword: %w", err)
@@ -77,7 +78,7 @@ func (u *User) HashPassword() error {
 	return nil
 }
 
-func (u *User) CompareHashAndPassword(password string) (bool, error) {
+func CompareHashAndPassword(u *models.User, password string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 	switch err {
 	case bcrypt.ErrMismatchedHashAndPassword:

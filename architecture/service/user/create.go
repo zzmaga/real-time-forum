@@ -8,17 +8,9 @@ import (
 )
 
 func (u *UserService) Create(user *models.User) (int64, error) {
-	if err := user.ValidateNickname(); err != nil {
-		return -1, ErrInvalidNickname
-	} else if err := user.ValidateEmail(); err != nil {
-		return -1, ErrInvalidEmail
-	}
-
-	err := user.HashPassword()
-	if err != nil {
-		return -1, fmt.Errorf("user.HashPassword: %w", err)
-	}
-
+	ValidateNickname(user)
+	ValidateEmail(user)
+	HashPassword(user)
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 	userId, err := u.repo.Create(user)
