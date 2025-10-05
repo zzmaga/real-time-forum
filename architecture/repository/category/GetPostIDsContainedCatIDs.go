@@ -7,7 +7,7 @@ import (
 
 func (c *CategoryRepo) GetPostIDsContainedCatIDs(ids []int64, offset, limit int64) ([]int64, error) {
 	strIDs := strings.Trim(strings.Replace(fmt.Sprint(ids), " ", ",", -1), "[]")
-	preQuery := fmt.Sprintf(`SELECT post_id, COUNT(category_id) as cat from posts_categories
+	preQuery := fmt.Sprintf(`SELECT post_id, COUNT(category_id) as cat from post_categories
 WHERE category_id IN (%s)
 GROUP BY post_id
 HAVING cat >= %d

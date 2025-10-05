@@ -6,7 +6,7 @@ import (
 
 func (c *CategoryRepo) AddToPost(categoryId, postId int64) (int64, error) {
 	row := c.db.QueryRow(`
-	INSERT INTO posts_categories (post_id, category_id) VALUES
+	INSERT INTO post_categories (post_id, category_id) VALUES
 	(?, ?) RETURNING id`, postId, categoryId)
 
 	id := int64(-1)
