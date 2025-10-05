@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// TODO: fix validation
 func (u *UserService) GetByNicknameOrEmail(field string) (*models.User, error) {
 	switch {
 	case strings.Contains(field, "@"):

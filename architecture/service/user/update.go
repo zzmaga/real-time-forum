@@ -10,22 +10,22 @@ import (
 
 func (u *UserService) Update(user *models.User) error {
 	// Валидация полей
-	if err := user.ValidateNickname(); err != nil {
+	if err := ValidateNickname(user); err != nil {
 		return ErrInvalidNickname
 	}
-	if err := user.ValidateEmail(); err != nil {
+	if err := ValidateEmail(user); err != nil {
 		return ErrInvalidEmail
 	}
-	if err := user.ValidateAge(); err != nil {
+	if err := ValidateAge(user); err != nil {
 		return ErrInvalidAge
 	}
-	if err := user.ValidateGender(); err != nil {
+	if err := ValidateGender(user); err != nil {
 		return ErrInvalidGender
 	}
 
 	// Хешируем пароль если он изменился
 	if user.Password != "" {
-		if err := user.HashPassword(); err != nil {
+		if err := HashPassword(user); err != nil {
 			return fmt.Errorf("user.HashPassword: %w", err)
 		}
 	}
