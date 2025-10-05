@@ -12,7 +12,7 @@ import (
 func (u *UserService) GetByNicknameOrEmail(field string) (*models.User, error) {
 	switch {
 	case strings.Contains(field, "@"):
-		if err := (&models.User{Email: field}).ValidateEmail(); err != nil {
+		if err := (&models.User{Email: field}); ValidateEmail(err) != nil {
 			return nil, ErrInvalidEmail
 		}
 		usr, err := u.repo.GetByEmail(field)
@@ -24,7 +24,7 @@ func (u *UserService) GetByNicknameOrEmail(field string) (*models.User, error) {
 		}
 		return nil, fmt.Errorf("u.repo.GetByEmail: %w", err)
 	default:
-		if err := (&models.User{Nickname: field}).ValidateNickname(); err != nil {
+		if err := (&models.User{Nickname: field}); ValidateNickname(err) != nil {
 			return nil, ErrInvalidNickname
 		}
 		usr, err := u.repo.GetByNickname(field)
