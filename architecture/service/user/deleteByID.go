@@ -1,9 +1,9 @@
 package user
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
-	ruser "real-time-forum/architecture/repository/user"
 )
 
 func (u *UserService) DeleteByID(id int64) error {
@@ -12,11 +12,12 @@ func (u *UserService) DeleteByID(id int64) error {
 	}
 
 	err := u.repo.DeleteByID(id)
-	switch {
-	case err == nil:
-		return nil
-	case errors.Is(err, ruser.ErrNotFound):
-		return ErrNotFound
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrNotFound
+		}
+		return fmt.Errorf("u.repo.DeleteByID: %w", err)
 	}
-	return fmt.Errorf("u.repo.DeleteByID: %w", err)
+
+	return nil
 }

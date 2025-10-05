@@ -4,12 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"real-time-forum/architecture/models"
-	ruser "real-time-forum/architecture/repository/user"
 	"time"
 )
 
 func (u *UserService) Update(user *models.User) error {
-	// Валидация полей
+	// Валидация
 	if err := ValidateNickname(user); err != nil {
 		return ErrInvalidNickname
 	}
@@ -23,23 +22,25 @@ func (u *UserService) Update(user *models.User) error {
 		return ErrInvalidGender
 	}
 
-	// Хешируем пароль если он изменился
+	// Хешируем пароль
 	if user.Password != "" {
 		if err := HashPassword(user); err != nil {
-			return fmt.Errorf("user.HashPassword: %w", err)
+			return fmt.Errorf("hash password: %w", err)
 		}
 	}
 
-	// Устанавливаем время обновления
 	user.UpdatedAt = time.Now()
 
-	// Обновляем в репозитории
+	// Обновляем
 	err := u.repo.Update(user)
-	switch {
-	case err == nil:
+	if err == nil {
 		return nil
-	case errors.Is(err, ruser.ErrNotFound):
+	}
+
+	if errors.Is(err, ErrNotFound) {
 		return ErrNotFound
 	}
-	return fmt.Errorf("u.repo.Update: %w", err)
+
+	// Логируем/пробрасываем
+	return fmt.Errorf("repo update: %w", err)
 }
