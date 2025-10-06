@@ -58,6 +58,7 @@ export async function displayPosts() {
     const postsContainer = document.getElementById('posts-container');
     postsContainer.innerHTML = '';
     let posts = null;
+    console.log("here");
     try {
         const response = await fetch('/api/posts', {
             method: 'GET',
@@ -128,7 +129,6 @@ export async function showPostAndComments(postId) {
     const post = postData.post;
     const comments = postData.comments;
     comments.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
-
     let commentsHtml = '';
     if (comments.length === 0) {
         commentsHtml = '<p>No comments yet.</p>';
@@ -137,7 +137,7 @@ export async function showPostAndComments(postId) {
             commentsHtml += `
                 <div class="comment-card">
                     <div class="comment-header">
-                        <p class="comment-author"><strong>${escapeHTML(comment.Author)}</strong></p>
+                        <p class="comment-author"><strong>${escapeHTML(comment.WUser.Nickname)}</strong></p>
                         <p class="comment-date">${new Date(comment.CreatedAt).toLocaleString()}</p>
                     </div>
                     <div class="comment-body">
@@ -155,13 +155,16 @@ export async function showPostAndComments(postId) {
                     <h2>${escapeHTML(post.Title)}</h2>
                     <p>${escapeHTML(post.Content)}</p>
                     <small>
-                        By: ${escapeHTML(post.Author)} | 
+                        By: ${escapeHTML(post.WUser.Nickname)} | 
                         Categories: ${
-                            Array.isArray(post.Category) 
-                                ? post.Category.map(c => escapeHTML(c)).join(', ') 
-                                : escapeHTML(post.Category)
+                            Array.isArray(post.WCategories) 
+                                ? post.WCategories.map(c => escapeHTML(c.Name)).join(', ') 
+                                : escapeHTML(post.WCategories.Name)
                         }
                     </small>
+                    <br>
+                    <button class="vote-btn ${post.WUserVote == 1 ? 'active-vote' : ''}" data-post-id="${post.Id}" data-vote-type="1">👍 <span class="like-count">${post.WVoteUp}</span></button>
+                    <button class="vote-btn ${post.WUserVote == -1 ? 'active-vote' : ''}" data-post-id="${post.Id}" data-vote-type="-1">👎 <span class="dislike-count">${post.WVoteDown}</span></button>
                 </div>
                 <hr>
                 <form id="add-comment-form" class="comment-form-container">
@@ -178,6 +181,10 @@ export async function showPostAndComments(postId) {
     
     document.getElementById('add-comment-form')
         .addEventListener('submit', (e) => handleAddComment(e, postId));
+    const voteButtons = mainContent.querySelectorAll('.vote-btn[data-post-id]');
+    voteButtons.forEach(button => {
+        button.addEventListener('click', handleVote);
+    });
 }
 
 async function handleCreatePost(event) {
@@ -242,11 +249,10 @@ async function handleAddComment(e, postId) {
 }
 
 function getVoteCounts(postId) {
-    const postCard = document.querySelector(`.post-card .vote-btn[data-post-id="${postId}"]`).closest('.post-actions').parentElement;
-    const likeCountSpan = postCard.querySelector(`.vote-btn[data-vote-type="1"] .like-count`);
-    const dislikeCountSpan = postCard.querySelector(`.vote-btn[data-vote-type="-1"] .dislike-count`);
-    const likeButton = postCard.querySelector(`.vote-btn[data-vote-type="1"]`);
-    const dislikeButton = postCard.querySelector(`.vote-btn[data-vote-type="-1"]`);
+    const likeButton = document.querySelector(`.vote-btn[data-post-id="${postId}"][data-vote-type="1"]`);
+    const dislikeButton = document.querySelector(`.vote-btn[data-post-id="${postId}"][data-vote-type="-1"]`);
+    const likeCountSpan = likeButton ? likeButton.querySelector('.like-count') : null;
+    const dislikeCountSpan = dislikeButton ? dislikeButton.querySelector('.dislike-count') : null;
     return { likeCountSpan, dislikeCountSpan, likeButton, dislikeButton };
 }
     

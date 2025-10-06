@@ -168,11 +168,39 @@ func (m *MainHandler) GetPostHandler(w http.ResponseWriter, r *http.Request, pos
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
-
+	post.WUser, err = m.service.User.GetByID(post.UserId)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	post.WVoteUp, post.WVoteDown, err = m.service.PostVote.GetByPostID(post.Id)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	session, _ := m.service.Session.GetByUuid(r.Header.Get("Authorization"))
+	postVote, err := m.service.PostVote.GetPostUserVote(session.UserID, post.Id)
+	if err != nil {
+		post.WUserVote = 0
+	} else {
+		post.WUserVote = postVote.Vote
+	}
+	post.WCategories, err = m.service.Category.GetByPostID(post.Id)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 	comments, err := m.service.PostComment.GetAllByPostID(postId, 0, 0)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
+	}
+	for i := 0; i < len(comments); i++ {
+		comments[i].WUser, err = m.service.User.GetByID(comments[i].UserId)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{"success": true, "post": post, "comments": comments})
