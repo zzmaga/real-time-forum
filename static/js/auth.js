@@ -10,6 +10,7 @@ export function renderLoginPage() {
         <form id="login-form">
             <input type="text" id="login" placeholder="Nickname or Email" required>
             <input type="password" id="password" placeholder="Password" required>
+            <span id="errmess"></span>
             <button type="submit">Login</button>
         </form>
     `;
@@ -38,6 +39,7 @@ export function renderRegisterPage() {
                 <option value="female">Female</option>
                 <option value="other">Other</option>
             </select>
+            <span id="errmess"></span>
             <button type="submit">Register</button>
         </form>
     `;
@@ -66,7 +68,7 @@ async function handleLogin(event) {
             connectWebSocket();
             navigate('#/posts');
         } else {
-            alert(data.error);
+            document.getElementById("errmess").innerHTML = data.error;
         }
     } catch (error) {
         console.error('Login error:', error);
@@ -95,6 +97,6 @@ async function handleRegister(event) {
         alert('Registration successful! Please log in.');
         navigate('#/login');
     } else {
-        alert(data.error);
+        document.getElementById("errmess").innerHTML = data.error;
     }
 }

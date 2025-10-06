@@ -30,6 +30,7 @@ export function renderCreatePostModal() {
                         <label><input type="checkbox" name="category" value="News"> News</label>
                         <label><input type="checkbox" name="category" value="Sports"> Sports</label>
                     </div>
+                    <span id="errmess"></span>
                     <button type="submit">Create Post</button>
                 </form>
             </div>
@@ -165,10 +166,12 @@ export async function showPostAndComments(postId) {
                     <br>
                     <button class="vote-btn ${post.WUserVote == 1 ? 'active-vote' : ''}" data-post-id="${post.Id}" data-vote-type="1">👍 <span class="like-count">${post.WVoteUp}</span></button>
                     <button class="vote-btn ${post.WUserVote == -1 ? 'active-vote' : ''}" data-post-id="${post.Id}" data-vote-type="-1">👎 <span class="dislike-count">${post.WVoteDown}</span></button>
+                    <span id="errmess"></span>
                 </div>
                 <hr>
                 <form id="add-comment-form" class="comment-form-container">
                     <textarea id="comment-content" placeholder="Write a comment..." required></textarea>
+                    <span id="comerrmess"></span>
                     <button type="submit">Send Comment</button>
                 </form>
                 <div id="comments-section">
@@ -215,7 +218,7 @@ async function handleCreatePost(event) {
         hideCreatePostModal();
         ws.send(JSON.stringify({ type: 'new_post', payload: postData }));
     } else {
-        alert(data.error);
+        document.getElementById("errmess").innerHTML = data.error;
     }
 }
 
@@ -244,7 +247,7 @@ async function handleAddComment(e, postId) {
         // Reload the post to show the new comment
         showPostAndComments(postId);
     } else {
-        alert(data.error || 'Failed to add comment.');
+        document.getElementById("comerrmess").innerHTML = data.error;
     }
 }
 
@@ -304,8 +307,7 @@ async function handleVote(event) {
             alert(data.error || 'Failed to handle vote.');
         }
     } catch (error) {
-        console.error('Failed to handle vote:', error);
-        alert('An error occurred while voting.');
+        document.getElementById("errmess").innerHTML = data.error;
     }
 }
 

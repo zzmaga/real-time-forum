@@ -428,3 +428,11 @@ button[type="submit"]:hover, #create-post-btn:hover {
     background-color: red;
     color:#ffffff;
 }
+
+#errmess{
+    color:#ff0000;
+}
+
+#comerrmess{
+    color:#ff0000;
+}

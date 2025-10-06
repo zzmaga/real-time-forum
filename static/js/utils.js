@@ -60,7 +60,8 @@ export function connectWebSocket() {
         console.log('Message from server:', message);
         if (message.type === 'new_post') {
             if (window.location.hash === '#/posts') {
-                displayPosts();
+                //displayPosts();
+                console.log("New post! I will do the notification later");
             }
         } else if (message.type === 'private_message') {
             handleIncomingPrivateMessage(message);
