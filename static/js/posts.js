@@ -77,7 +77,7 @@ export async function displayPosts() {
     posts.forEach(post => {
         const postElement = document.createElement('div');
         postElement.className = 'post-card';
-        const categories = Array.isArray(post.WCategories) ? post.WCategories.join(', ') : post.WCategories;
+        const categories = Array.isArray(post.WCategories) ? post.WCategories.map(category => category.Name).join(', ') : post.WCategories.Name;
         const titleElement = document.createElement('h3');
         titleElement.className = 'post-title';
         titleElement.style.cursor = 'pointer';

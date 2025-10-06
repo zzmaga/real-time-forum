@@ -68,6 +68,11 @@ func (m *MainHandler) DisplayPostsHandler(w http.ResponseWriter, r *http.Request
 		} else {
 			posts[i].WUserVote = postVote.Vote
 		}
+		posts[i].WCategories, err = m.service.Category.GetByPostID(posts[i].Id)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 	}
 	// Мне нужно имя автора и потом категории
 	// Могу сам добавить или ты. Думаю ты можешь создать стракт в GetAll
@@ -114,8 +119,6 @@ func (m *MainHandler) CreatePostHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	// Add categories to post
-	log.Println(postData.Category)
-	log.Println(len(postData.Category))
 	if len(postData.Category) > 0 {
 		err = m.service.Category.AddToPostByNames(postData.Category, postID)
 		if err != nil {
