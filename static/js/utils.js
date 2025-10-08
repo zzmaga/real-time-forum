@@ -1,4 +1,4 @@
-import { navigate } from './script.js';
+import { navigate, showAlert } from './script.js';
 import { handleIncomingPrivateMessage } from './chats.js';
 import { displayPosts } from './posts.js';
 
@@ -61,6 +61,8 @@ export function connectWebSocket() {
         if (message.type === 'new_post') {
             if (window.location.hash === '#/posts') {
                 //displayPosts();
+                showAlert('infoAlert', 'NEW POST!', 'Update the page now!');
+                //showAlert('successAlert');
                 console.log("New post! I will do the notification later");
             }
         } else if (message.type === 'private_message') {

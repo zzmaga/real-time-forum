@@ -214,7 +214,7 @@ async function handleCreatePost(event) {
         document.getElementById('title').value = '';
         document.getElementById('post-content').value = '';
         document.querySelectorAll('#category-checkboxes input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
-        displayPosts();
+        //displayPosts();
         hideCreatePostModal();
         ws.send(JSON.stringify({ type: 'new_post', payload: postData }));
     } else {

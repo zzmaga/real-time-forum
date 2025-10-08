@@ -84,8 +84,6 @@ button[type="submit"]:hover, #create-post-btn:hover {
   overflow: auto;
 }
 
-
-
 #main-content {
     padding: 20px;
 }
@@ -111,7 +109,7 @@ button[type="submit"]:hover, #create-post-btn:hover {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 1000; /* Ensure modal is above notifications */
     left: 0;
     top: 0;
     width: 100%;
@@ -344,15 +342,13 @@ button[type="submit"]:hover, #create-post-btn:hover {
     max-width: 150px;
 }
 
-/* ... (existing styles) */
-
 /* New styles for the single post view */
 .centered-container {
     display: flex;
     flex-direction: column;
-    align-items: center; /* This centers the content horizontally */
-    max-width: 800px; /* Adjust this value to set the desired width */
-    margin: 20px auto; /* Centers the container on the page with vertical margins */
+    align-items: center; 
+    max-width: 800px;
+    margin: 20px auto; 
     padding: 20px;
 }
 
@@ -436,3 +432,178 @@ button[type="submit"]:hover, #create-post-btn:hover {
 #comerrmess{
     color:#ff0000;
 }
+
+.hidden { display: none !important; }
+.font__weight-semibold { font-weight: 600; }
+.p-4 { padding: 1rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mt-5 { margin-top: 1.25rem; }
+.ml-4 { margin-left: 1rem; }
+.rounded-lg { border-radius: 0.5rem; }
+
+.alerts-wrapper {
+    position: fixed;
+    top: 50px; 
+    right: 10px;
+    width: 100%;
+    max-width: 350px; 
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    z-index: 200;
+}
+
+.alert > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.alert-content {
+    display: flex;
+    align-items: center;
+}
+.alert-content strong {
+    margin-right: 0.25rem;
+}
+.alert-close {
+    flex-shrink: 0;
+    cursor: pointer;
+    padding: 0.25rem; 
+    background: none;
+    border: none;
+}
+
+.icon-size-lg { 
+    width: 1.25rem; 
+    height: 1.25rem; 
+    fill: currentColor;
+}
+.alert-content .icon-start {
+    margin-right: 0.75rem; 
+    min-width: 20px;
+}
+
+.close-icon-success { fill: #25ff0b; }
+.close-icon-info { fill: #0bd2ff; }
+.close-icon-warning { fill: #ffb40b; }
+.close-icon-danger { fill: #ff0303; }
+.close-icon-primary { fill: #03d0ff; }
+
+.close-icon-x {
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+    -webkit-animation: blink-1 2s infinite both;
+    animation: blink-1 2s infinite both;
+}
+
+.alert-simple { 
+    z-index: 10;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.alert-simple.alert-success {
+    border: 1px solid rgba(36, 241, 6, 0.46);
+    background-color: rgba(7, 149, 66, 0.12);
+    box-shadow: 0px 0px 2px #259c08;
+    color: #0ad406;
+    text-shadow: 2px 1px #00040a;
+    transition: 0.5s;
+}
+.alert-success:hover {
+    background-color: rgba(7, 149, 66, 0.35);
+    transition: 0.5s;
+}
+.alert-simple.alert-info {
+    border: 1px solid rgba(6, 44, 241, 0.46);
+    background-color: rgba(7, 73, 149, 0.12);
+    box-shadow: 0px 0px 2px #0396ff;
+    color: #0396ff;
+    text-shadow: 2px 1px #00040a;
+    transition: 0.5s;
+}
+
+.alert-info:hover {
+    background-color: rgba(7, 73, 149, 0.35);
+    transition: 0.5s;
+}
+.alert-simple.alert-warning {
+    border: 1px solid rgba(241, 142, 6, 0.81);
+    background-color: rgba(220, 128, 1, 0.16);
+    box-shadow: 0px 0px 2px #ffb103;
+    color: #ffb103;
+    text-shadow: 2px 1px #00040a;
+    transition: 0.5s;
+}
+
+.alert-warning:hover {
+    background-color: rgba(220, 128, 1, 0.33);
+    transition: 0.5s;
+}
+.alert-simple.alert-danger {
+    border: 1px solid rgba(241, 6, 6, 0.81);
+    background-color: rgba(220, 17, 1, 0.16);
+    box-shadow: 0px 0px 2px #ff0303;
+    color: #ff0303;
+    text-shadow: 2px 1px #00040a;
+    transition: 0.5s;
+}
+
+.alert-danger:hover {
+    background-color: rgba(220, 17, 1, 0.33);
+    transition: 0.5s;
+}
+.alert-simple.alert-primary {
+    border: 1px solid rgba(6, 241, 226, 0.81);
+    background-color: rgba(1, 204, 220, 0.16);
+    box-shadow: 0px 0px 2px #03fff5;
+    color: #03d0ff;
+    text-shadow: 2px 1px #00040a;
+    transition: 0.5s;
+}
+
+.alert-primary:hover {
+    background-color: rgba(1, 204, 220, 0.33);
+    transition: 0.5s;
+}
+
+/* Left vertical line accent */
+.alert:before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: calc(100% - 44px);
+    border-left: 1px solid;
+    border-right: 2px solid;
+    border-bottom-right-radius: 3px;
+    border-top-right-radius: 3px;
+    left: 0;
+    top: 50%;
+    transform: translate(0,-50%);
+    height: 20px;
+}
+
+/* Custom Animations */
+@-webkit-keyframes blink-1 {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0; }
+}
+@keyframes blink-1 {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0; }
+}
+
+.faa-tada.animated { animation: tada 1s infinite; }
+.faa-shake.animated { animation: shake 0.5s infinite; }
+.faa-flash.animated { animation: flash 1.5s infinite; }
+.faa-pulse.animated { animation: pulse 2s infinite; }
+.faa-bounce.animated { animation: bounce 2s infinite; }
+
+@keyframes tada { 0% { transform: scale(1); } 10%, 20% { transform: scale(0.9) rotate(-3deg); } 30%, 50%, 70%, 90% { transform: scale(1.1) rotate(3deg); } 40%, 60%, 80% { transform: scale(1.1) rotate(-3deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); } 20%, 40%, 60%, 80% { transform: translateX(10px); } }
+@keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-30px); } 60% { transform: translateY(-15px); } }
+
+/* --- Notification Styles End --- */
