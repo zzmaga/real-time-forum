@@ -22,7 +22,7 @@ type UserService interface {
 
 	GetByID(id int64) (*User, error)
 	GetByNicknameOrEmail(field string) (*User, error)
-	// GetAll(from, offset int64) ([]*User, error)
+	GetAll() ([]*User, error)
 }
 
 type UserRepo interface {
@@ -33,5 +33,5 @@ type UserRepo interface {
 	GetByID(id int64) (*User, error)
 	GetByNickname(nickname string) (*User, error)
 	GetByEmail(email string) (*User, error)
-	// GetAll(from, offset int64) ([]*User, error)
+	GetAll() ([]*User, error)
 }

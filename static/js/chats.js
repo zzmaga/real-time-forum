@@ -61,24 +61,35 @@ async function fetchUsers() {
         }
         
         const users = await response.json();
-        console.log(users);
-        users.sort((a, b) => a.nickname.localeCompare(b.nickname));
-        console.log(users);
-        users.forEach(user => {
+        console.log('Raw users data:', users);
+        
+        // Filter out users with invalid nicknames and sort
+        const validUsers = users.filter(user => {
+            console.log('Checking user:', user);
+            return user && user.Nickname && typeof user.Nickname === 'string';
+        });
+        
+        console.log('Valid users before sort:', validUsers);
+        validUsers.sort((a, b) => {
+            console.log('Sorting:', a.Nickname, 'vs', b.Nickname);
+            return a.Nickname.localeCompare(b.Nickname);
+        });
+        console.log(validUsers);
+        validUsers.forEach(user => {
             const userElement = document.createElement('div');
             userElement.className = 'user-item';
-            userElement.dataset.userId = user.id;
+            userElement.dataset.userId = user.ID;
 
-            const isOnline = checkUserOnlineStatus(user.id);
+            const isOnline = checkUserOnlineStatus(user.ID);
             const statusDot = isOnline ? '<span class="status-dot online"></span>' : '<span class="status-dot offline"></span>';
 
             userElement.innerHTML = `
                 ${statusDot}
-                <span class="user-nickname">${user.nickname}</span>
+                <span class="user-nickname">${user.Nickname}</span>
             `;
             
             userElement.addEventListener('click', () => {
-                selectUserForChat(user.id, user.nickname);
+                selectUserForChat(user.ID, user.Nickname);
             });
 
             usersList.appendChild(userElement);
@@ -119,19 +130,20 @@ async function selectUserForChat(userId, nickname) {
         if (response.ok) {
             const messages = await response.json();
             
+            const currentUserId = await getCurrentUserId();
             messages.reverse().forEach(msg => {
                 const messageElement = document.createElement('div');
-                const isSent = msg.sender_id === getCurrentUserId(); 
+                const isSent = msg.SenderID === currentUserId; 
                 messageElement.className = `chat-message ${isSent ? 'sent' : 'received'}`;
                 
-                const messageDate = new Date(msg.created_at).toLocaleString();
+                const messageDate = new Date(msg.CreatedAt).toLocaleString();
 
                 messageElement.innerHTML = `
                     <div class="message-header">
-                        <span class="message-author">${isSent ? 'You' : msg.sender_nickname}</span>
+                        <span class="message-author">${isSent ? 'You' : msg.SenderNickname}</span>
                         <span class="message-date">${messageDate}</span>
                     </div>
-                    <p>${msg.content}</p>
+                    <p>${msg.Content}</p>
                 `;
                 messagesContainer.appendChild(messageElement);
             });
@@ -148,9 +160,21 @@ async function selectUserForChat(userId, nickname) {
     chatForm.addEventListener('submit', handleSendMessage);
 }
 
-function getCurrentUserId() {
-    // Placeholder function to get the current user's ID
-    return 1;
+async function getCurrentUserId() {
+    try {
+        const response = await fetch('/api/users/profile', {
+            method: 'GET',
+            headers: { 'Authorization': `${userToken}` }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            return data.user.ID;
+        }
+    } catch (error) {
+        console.error('Failed to get current user ID:', error);
+    }
+    return null;
 }
 
 function handleSendMessage(event) {

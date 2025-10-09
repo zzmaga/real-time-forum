@@ -2,7 +2,9 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"real-time-forum/architecture/models"
 )
 
 func (m *MainHandler) UsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -20,21 +22,34 @@ func (m *MainHandler) GetAllUsersHandler(w http.ResponseWriter, r *http.Request)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-	_, err := m.service.Session.GetByUuid(authHeader)
+	session, err := m.service.Session.GetByUuid(authHeader)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
 
-	// For now, we'll return users with messages
-	// In a real implementation, you might want to return all users
-	// and handle online status separately
-	users, err := m.service.PrivateMessage.GetUsersWithMessages(1) // This should be the current user ID
+	// Get all users except the current user
+	allUsers, err := m.service.User.GetAll()
 	if err != nil {
+		log.Printf("Error getting all users: %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
+	log.Printf("Retrieved %d users from database", len(allUsers))
+	for i, user := range allUsers {
+		log.Printf("User %d: ID=%d, Nickname='%s', Email='%s'", i, user.ID, user.Nickname, user.Email)
+	}
+
+	// Filter out the current user
+	var users []*models.User
+	for _, user := range allUsers {
+		if user.ID != session.UserID {
+			users = append(users, user)
+		}
+	}
+
+	log.Printf("Returning %d users (excluding current user)", len(users))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
