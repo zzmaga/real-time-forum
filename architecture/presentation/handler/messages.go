@@ -64,13 +64,11 @@ func (m *MainHandler) GetMessagesHandler(w http.ResponseWriter, r *http.Request)
 	if request.Limit == 0 {
 		request.Limit = 10
 	}
-
 	messages, err := m.service.PrivateMessage.GetByUserPair(session.UserID, request.RecipientID, request.Offset, request.Limit)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(messages)
 }

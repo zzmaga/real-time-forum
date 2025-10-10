@@ -25,6 +25,6 @@ func main() {
 	// Start WebSocket message broadcaster
 	go handler.HandleMessages()
 
-	log.Println("Server starting on http://localhost:8081...")
-	log.Fatal(http.ListenAndServe(":8081", router))
+	log.Println("Server starting on http://localhost:8080...")
+	log.Fatal(http.ListenAndServe(":8080", router))
 }

@@ -16,13 +16,11 @@ func (r *PrivateMessageRepo) GetByUserPair(userID1, userID2 int64, offset, limit
 		ORDER BY pm.created_at DESC
 		LIMIT ? OFFSET ?
 	`
-
 	rows, err := r.db.Query(query, userID1, userID2, userID2, userID1, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-
 	var messages []*models.PrivateMessage
 	for rows.Next() {
 		msg := &models.PrivateMessage{}
@@ -35,6 +33,9 @@ func (r *PrivateMessageRepo) GetByUserPair(userID1, userID2 int64, offset, limit
 		}
 		messages = append(messages, msg)
 	}
-
+	if messages == nil {
+		// Js воспринимает нил как null из за чего возникает ошибка на фронте
+		return []*models.PrivateMessage{}, nil
+	}
 	return messages, nil
 }

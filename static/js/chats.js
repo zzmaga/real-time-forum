@@ -16,7 +16,7 @@ export function renderChatsPage() {
                 </div>
                 <form id="chat-form" class="chat-input-area" style="display: none;">
                     <input type="text" id="chat-input" placeholder="Type a message..." required>
-                    <button type="submit" id="send-button">筐､</button>
+                    <button type="submit" id="send-button">></button>
                 </form>
             </div>
         </div>
@@ -81,6 +81,7 @@ async function fetchUsers() {
             userElement.dataset.userId = user.ID;
 
             const isOnline = checkUserOnlineStatus(user.ID);
+            console.log(isOnline);
             const statusDot = isOnline ? '<span class="status-dot online"></span>' : '<span class="status-dot offline"></span>';
 
             userElement.innerHTML = `
@@ -112,7 +113,6 @@ async function selectUserForChat(userId, nickname) {
     messagesContainer.innerHTML = `<h3>Chat with ${nickname}</h3>`;
     chatForm.style.display = 'flex';
     chatForm.dataset.recipientId = userId;
-    
     try {
         const response = await fetch('/api/messages', {
             method: 'POST',
@@ -126,31 +126,37 @@ async function selectUserForChat(userId, nickname) {
                 limit: 10
             })
         });
-        
         if (response.ok) {
             const messages = await response.json();
-            
+            if (!Array.isArray(messages)) {
+                console.error('API response is not an array:', messages);
+                messagesContainer.innerHTML += '<p>Failed to load messages due to unexpected data format.</p>';
+                return;
+            }
             const currentUserId = await getCurrentUserId();
-            messages.reverse().forEach(msg => {
-                const messageElement = document.createElement('div');
-                const isSent = msg.SenderID === currentUserId; 
-                messageElement.className = `chat-message ${isSent ? 'sent' : 'received'}`;
-                
-                const messageDate = new Date(msg.CreatedAt).toLocaleString();
+            if (messages.length === 0) {
+                messagesContainer.innerHTML += '<p>There are no messages yet. Start the chat!</p>';
+            } else{
+                messages.reverse().forEach(msg => {
+                    const messageElement = document.createElement('div');
+                    const isSent = msg.SenderID === currentUserId; 
+                    messageElement.className = `chat-message ${isSent ? 'sent' : 'received'}`;
 
-                messageElement.innerHTML = `
-                    <div class="message-header">
-                        <span class="message-author">${isSent ? 'You' : msg.SenderNickname}</span>
-                        <span class="message-date">${messageDate}</span>
-                    </div>
-                    <p>${msg.Content}</p>
-                `;
-                messagesContainer.appendChild(messageElement);
-            });
-            
+                    const messageDate = new Date(msg.CreatedAt).toLocaleString();
+
+                    messageElement.innerHTML = `
+                        <div class="message-header">
+                            <span class="message-author">${isSent ? 'You' : msg.SenderNickname}</span>
+                            <span class="message-date">${messageDate}</span>
+                        </div>
+                        <p>${msg.Content}</p>
+                    `;
+                    messagesContainer.appendChild(messageElement);
+                });
+            }
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         } else {
-            messagesContainer.innerHTML += '<p>Failed to load messages</p>';
+            messagesContainer.innerHTML += '<p>Failed to fetch messages</p>';
         }
     } catch (error) {
         console.error('Failed to fetch messages:', error);

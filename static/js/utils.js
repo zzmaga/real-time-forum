@@ -86,7 +86,6 @@ export function handleLogout() {
     if (ws) {
         ws.close();
     }
-    console.log("was");
     updateNav();
     navigate('#/login');
 }
