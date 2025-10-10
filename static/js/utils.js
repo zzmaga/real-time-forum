@@ -48,7 +48,15 @@ export function handleAuthResponse(response) {
 
 export function connectWebSocket() {
     if (ws && ws.readyState === WebSocket.OPEN) return;
-
+    if (ws) {
+        ws.onmessage = null;
+        ws.onclose = null;
+        ws.onerror = null;
+        // Optionally close the old one, just in case
+        if (ws.readyState !== WebSocket.CLOSED) {
+            ws.close();
+        }
+    }
     ws = new WebSocket(`ws://localhost:8080/ws?token=${userToken}`);
 
     ws.onopen = () => {
@@ -72,6 +80,7 @@ export function connectWebSocket() {
 
     ws.onclose = () => {
         console.log('WebSocket connection closed. Attempting to reconnect...');
+        ws = null;
         setTimeout(connectWebSocket, 1000);
     };
 

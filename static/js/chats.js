@@ -22,12 +22,15 @@ export function renderChatsPage() {
         </div>
     `;
     fetchUsers();
+    const chatForm = document.getElementById('chat-form');
+    if (chatForm) {
+        chatForm.addEventListener('submit', handleSendMessage);
+    }
 }
 
 export function handleIncomingPrivateMessage(message) {
     const messagesContainer = document.getElementById('messages-container');
     if (!messagesContainer || selectedRecipientId !== message.payload.sender_id) return;
-    
     const payload = message.payload;
     const messageElement = document.createElement('div');
     messageElement.className = 'chat-message received';
@@ -163,7 +166,7 @@ async function selectUserForChat(userId, nickname) {
         messagesContainer.innerHTML += '<p>Failed to load messages</p>';
     }
     
-    chatForm.addEventListener('submit', handleSendMessage);
+    //chatForm.addEventListener('submit', handleSendMessage);
 }
 
 async function getCurrentUserId() {

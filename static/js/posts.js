@@ -59,7 +59,6 @@ export async function displayPosts() {
     const postsContainer = document.getElementById('posts-container');
     postsContainer.innerHTML = '';
     let posts = null;
-    console.log("here");
     try {
         const response = await fetch('/api/posts', {
             method: 'GET',
@@ -75,7 +74,6 @@ export async function displayPosts() {
         return;
     }
     posts.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
-    console.log(posts)
     posts.forEach(post => {
         const postElement = document.createElement('div');
         postElement.className = 'post-card';
