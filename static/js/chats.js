@@ -39,7 +39,7 @@ export function handleIncomingPrivateMessage(message) {
     
     messageElement.innerHTML = `
         <div class="message-header">
-            <span class="message-author">${payload.sender_name}</span>
+            <span class="message-author">${payload.sender_name}</span> ‎ | ‎
             <span class="message-date">${messageDate}</span>
         </div>
         <p>${payload.content}</p>
@@ -149,7 +149,7 @@ async function selectUserForChat(userId, nickname) {
 
                     messageElement.innerHTML = `
                         <div class="message-header">
-                            <span class="message-author">${isSent ? 'You' : msg.SenderNickname}</span>
+                            <span class="message-author">${isSent ? 'You' : msg.SenderNickname}</span> ‎ | ‎  
                             <span class="message-date">${messageDate}</span>
                         </div>
                         <p>${msg.Content}</p>
@@ -213,7 +213,7 @@ function handleSendMessage(event) {
         
         messageElement.innerHTML = `
             <div class="message-header">
-                <span class="message-author">You</span>
+                <span class="message-author">You</span> ‎ | ‎
                 <span class="message-date">${messageDate}</span>
             </div>
             <p>${content}</p>
