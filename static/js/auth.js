@@ -1,5 +1,5 @@
 import { updateNav, handleAuthResponse, userToken, connectWebSocket } from './utils.js';
-import { navigate} from './script.js'
+import { navigate, showAlert} from './script.js'
 import { displayPosts } from './posts.js';
 
 const mainContent = document.getElementById('main-content');
@@ -94,7 +94,8 @@ async function handleRegister(event) {
     });
     const data = await response.json();
     if (data.success) {
-        alert('Registration successful! Please log in.');
+        showAlert('successAlert', 'Registration Successful!', 'Please log in.');
+       //alert('Registration successful! Please log in.');
         navigate('#/login');
     } else {
         document.getElementById("errmess").innerHTML = data.error;

@@ -1,5 +1,6 @@
 import { handleAuthResponse, userToken, ws } from './utils.js';
 import { navigate } from './script.js';
+import {getCurrentUserId} from './chats.js'
 
 const mainContent = document.getElementById('main-content');
 
@@ -212,9 +213,14 @@ async function handleCreatePost(event) {
         document.getElementById('title').value = '';
         document.getElementById('post-content').value = '';
         document.querySelectorAll('#category-checkboxes input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
-        //displayPosts();
         hideCreatePostModal();
-        ws.send(JSON.stringify({ type: 'new_post', payload: postData }));
+        displayPosts();
+        const currentUserId = await getCurrentUserId();
+        const postPayload ={
+            ...postData,
+            sender_id: currentUserId
+        };
+        ws.send(JSON.stringify({ type: 'new_post', payload: postPayload}));
     } else {
         document.getElementById("errmess").innerHTML = data.error;
     }

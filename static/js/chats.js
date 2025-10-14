@@ -169,7 +169,7 @@ async function selectUserForChat(userId, nickname) {
     //chatForm.addEventListener('submit', handleSendMessage);
 }
 
-async function getCurrentUserId() {
+export async function getCurrentUserId() {
     try {
         const response = await fetch('/api/users/profile', {
             method: 'GET',

@@ -1,9 +1,10 @@
 import { navigate, showAlert } from './script.js';
-import { handleIncomingPrivateMessage } from './chats.js';
-import { displayPosts } from './posts.js';
+import { handleIncomingPrivateMessage, getCurrentUserId } from './chats.js';
+
 
 export let userToken = localStorage.getItem('userToken');
 export let ws;
+let currentUserId = null; 
 
 const loginLink = document.getElementById('login-link');
 const registerLink = document.getElementById('register-link');
@@ -46,7 +47,10 @@ export function handleAuthResponse(response) {
     return response.json();
 }
 
-export function connectWebSocket() {
+export async function connectWebSocket() {
+    if (currentUserId === null) {
+        currentUserId = await getCurrentUserId(); 
+    }
     if (ws && ws.readyState === WebSocket.OPEN) return;
     if (ws) {
         ws.onmessage = null;
@@ -68,10 +72,11 @@ export function connectWebSocket() {
         console.log('Message from server:', message);
         if (message.type === 'new_post') {
             if (window.location.hash === '#/posts') {
-                //displayPosts();
-                showAlert('infoAlert', 'NEW POST!', 'Update the page now!');
-                //showAlert('successAlert');
-                console.log("New post! I will do the notification later");
+                if(currentUserId !== message.payload.sender_id){
+                    showAlert('infoAlert', 'NEW POST!', 'Update the page now!');
+                } else{
+                    showAlert('successAlert', 'Post created!', 'Page is updated');
+                }
             }
         } else if (message.type === 'private_message') {
             handleIncomingPrivateMessage(message);
