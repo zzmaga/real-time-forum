@@ -36,7 +36,6 @@ export function handleIncomingPrivateMessage(message) {
     messageElement.className = 'chat-message received';
     
     const messageDate = new Date(payload.created_at).toLocaleString();
-    
     messageElement.innerHTML = `
         <div class="message-header">
             <span class="message-author">${payload.sender_name}</span> ‎ | ‎
