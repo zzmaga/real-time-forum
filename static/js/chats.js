@@ -1,4 +1,5 @@
 import { userToken, handleAuthResponse, ws } from './utils.js';
+import { navigate} from './script.js';
 
 const mainContent = document.getElementById('main-content');
 let selectedRecipientId = null;
@@ -95,7 +96,7 @@ export function handleIncomingPrivateMessage(message) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-async function fetchUsers() {
+export async function fetchUsers() {
     const usersList = document.getElementById('users-online-list');
     usersList.innerHTML = '';
     
@@ -132,6 +133,9 @@ async function fetchUsers() {
             `;
             
             userElement.addEventListener('click', () => {
+                if(window.location.hash !== '#/chats'){
+                    navigate('#/chats');
+                }
                 selectUserForChat(user.ID, user.Nickname);
             });
 

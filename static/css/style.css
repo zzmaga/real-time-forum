@@ -1,9 +1,15 @@
+html, body {
+    height: 100%; /* Important: Make html and body fill the viewport */
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
     color: #333;
-    margin: 0;
-    padding: 0;
+    display: flex; /* Enable flexbox on the body */
+    flex-direction: column; /* Stack children (header, main, etc.) vertically */
 }
 
 header {
@@ -11,6 +17,7 @@ header {
     color: #fff;
     padding: 1em;
     text-align: center;
+    flex-shrink: 0; /* Prevent header from shrinking */
 }
 
 header a {
@@ -21,7 +28,11 @@ header a {
 }
 
 main {
+    flex-grow: 1; /* Allows main to take up all remaining vertical space */
+    display: flex; /* Enable flex for horizontal layout of #main-content */
     padding: 20px;
+    box-sizing: border-box; /* Include padding in total height */
+    overflow: hidden; /* Prevent scrollbars from inner content */
 }
 
 form {
@@ -85,7 +96,10 @@ button[type="submit"]:hover, #create-post-btn:hover {
 }
 
 #main-content {
-    padding: 20px;
+    flex-grow: 1; /* Fills the space inside main */
+    display: flex; /* Makes it ready to manage chat-container/posts-wrapper */
+    padding: 0; /* Remove redundant padding */
+    overflow: hidden;
 }
 
 #main-content h2 {
@@ -144,10 +158,12 @@ button[type="submit"]:hover, #create-post-btn:hover {
 }
 
 .posts-wrapper {
+    flex-grow: 1; /* Allows posts-wrapper to take full height */
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 20px;
+    padding: 20px;
+    overflow: hidden;
 }
 
 #create-post-btn {
@@ -155,6 +171,9 @@ button[type="submit"]:hover, #create-post-btn:hover {
 }
 
 #posts-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -183,22 +202,27 @@ button[type="submit"]:hover, #create-post-btn:hover {
 
 .chat-container {
     display: flex;
-    height: calc(100vh - 80px);
+    flex-grow: 1;
+    height: 100%;
     border: 1px solid #ccc;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .user-list {
+    flex-shrink: 0;
     width: 25%;
     border-right: 1px solid #ddd;
     overflow-y: auto;
     background-color: #f9f9f9;
     padding: 10px;
+    display: flex;
+    flex-direction: column;
 }
 
 .user-list h3 {
     text-align: center;
     margin-top: 0;
+    flex-shrink: 0;
 }
 
 .user-item {
@@ -227,7 +251,7 @@ button[type="submit"]:hover, #create-post-btn:hover {
 }
 
 .chat-area {
-    width: 75%;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     background-color: #fff;
@@ -239,6 +263,7 @@ button[type="submit"]:hover, #create-post-btn:hover {
 #messages-container {
     flex: 1;
     overflow-y: auto;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -342,7 +367,64 @@ button[type="submit"]:hover, #create-post-btn:hover {
     max-width: 150px;
 }
 
-/* New styles for the single post view */
+/* --- Single Post Scrollability START --- */
+
+#single-post-wrapper-container {
+    /* Use the existing posts-wrapper styles for overall layout */
+    /* Override gap since #post-page-wrapper will manage spacing */
+    gap: 0; 
+    padding: 0; /* Remove padding from posts-wrapper */
+}
+
+#post-page-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+#single-post-fixed {
+    flex-shrink: 0; /* Ensures the post content stays fixed at the top */
+    padding: 20px 0;
+    width: 100%;
+}
+
+#comments-scroll-area {
+    flex-grow: 1; /* Takes up all remaining vertical space */
+    overflow-y: auto; /* Makes only the comments section scrollable */
+    min-height: 0; /* Prevents flex from overriding the height */
+    padding-bottom: 20px; 
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column; 
+    padding: 0 20px; /* Add horizontal padding for content inside the scroll area */
+}
+
+.comment-form-container {
+    flex-shrink: 0; 
+    margin: 0 auto 20px auto; 
+    max-width: 760px;
+    width: 100%;
+}
+
+#comments-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: 10px;
+}
+
+.comment-card {
+    margin: 0 auto; 
+    max-width: 760px;
+    width: 100%;
+}
+
+/* --- Single Post Scrollability END --- */
+
 .centered-container {
     display: flex;
     flex-direction: column;
@@ -356,12 +438,15 @@ button[type="submit"]:hover, #create-post-btn:hover {
 .comment-card,
 .comment-form-container {
     width: 100%;
+    min-width: 600px;
+    overflow-y: auto;
     border: 1px solid #ddd;
     border-radius: 8px;
     background-color: #fff;
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
 }
 
 .single-post-container p {
@@ -605,5 +690,3 @@ button[type="submit"]:hover, #create-post-btn:hover {
 @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-30px); } 60% { transform: translateY(-15px); } }
-
-/* --- Notification Styles End --- */

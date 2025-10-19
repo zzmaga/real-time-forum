@@ -1,17 +1,33 @@
 import { handleAuthResponse, userToken, ws } from './utils.js';
 import { navigate } from './script.js';
-import {getCurrentUserId} from './chats.js'
+import {getCurrentUserId, fetchUsers,} from './chats.js'
 
 const mainContent = document.getElementById('main-content');
 
 export function renderPostsPage() {
-    mainContent.innerHTML = `
+    /*mainContent.innerHTML = `
         <div class="posts-wrapper">
             <h2>Forum Posts</h2>
             <button id="create-post-btn">Create a post</button>
             <div id="posts-container"></div>
         </div>
+        
+    `;*/
+    mainContent.innerHTML = `
+        <div class="chat-container">
+            <div class="user-list">
+                <h3>Users</h3>
+                <div id="users-online-list"></div>
+            </div>
+            <div class="posts-wrapper">
+                <h2>Forum Posts</h2>
+                <button id="create-post-btn">Create a post</button>
+                <div id="posts-container"></div>
+            </div>
+        </div>
     `;
+    fetchUsers();
+
     document.getElementById('create-post-btn').addEventListener('click', showCreatePostModal);
     displayPosts();
 }
@@ -147,8 +163,45 @@ export async function showPostAndComments(postId) {
             `;
         });
     }
-
     mainContent.innerHTML = `
+        <div class="chat-container">
+            <div class="user-list">
+                <h3>Users</h3>
+                <div id="users-online-list"></div>
+            </div>
+            <div class="centered-container">
+            <div class="single-post-container">
+                <div class="post-content-section">
+                    <h2>${escapeHTML(post.Title)}</h2>
+                    <p>${escapeHTML(post.Content)}</p>
+                    <small>
+                        By: ${escapeHTML(post.WUser.Nickname)} | 
+                        Categories: ${
+                            Array.isArray(post.WCategories) 
+                                ? post.WCategories.map(c => escapeHTML(c.Name)).join(', ') 
+                                : escapeHTML(post.WCategories.Name)
+                        }
+                    </small>
+                    <br>
+                    <button class="vote-btn ${post.WUserVote == 1 ? 'active-vote' : ''}" data-post-id="${post.Id}" data-vote-type="1">👍 <span class="like-count">${post.WVoteUp}</span></button>
+                    <button class="vote-btn ${post.WUserVote == -1 ? 'active-vote' : ''}" data-post-id="${post.Id}" data-vote-type="-1">👎 <span class="dislike-count">${post.WVoteDown}</span></button>
+                    <span id="errmess"></span>
+                </div>
+                <hr>
+                <form id="add-comment-form" class="comment-form-container">
+                    <textarea id="comment-content" placeholder="Write a comment..." required></textarea>
+                    <span id="comerrmess"></span>
+                    <button type="submit">Send Comment</button>
+                </form>
+                <div id="comments-section">
+                    <h3>Comments</h3>
+                    ${commentsHtml}
+                </div>
+            </div>
+        </div>
+        </div>
+    `;
+    /*mainContent.innerHTML = `
         <div class="centered-container">
             <div class="single-post-container">
                 <div class="post-content-section">
@@ -179,8 +232,8 @@ export async function showPostAndComments(postId) {
                 </div>
             </div>
         </div>
-    `;
-    
+    `;*/
+    fetchUsers();
     document.getElementById('add-comment-form')
         .addEventListener('submit', (e) => handleAddComment(e, postId));
     const voteButtons = mainContent.querySelectorAll('.vote-btn[data-post-id]');
