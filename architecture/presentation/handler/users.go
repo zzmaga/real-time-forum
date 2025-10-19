@@ -48,7 +48,16 @@ func (m *MainHandler) GetAllUsersHandler(w http.ResponseWriter, r *http.Request)
 			users = append(users, user)
 		}
 	}
-
+	/*var messages []*models.PrivateMessage
+	for _, user := range allUsers {
+		if user.ID != session.UserID {
+			mes, err := m.service.PrivateMessage.GetLastMessageBetweenUsers(session.UserID, user.ID)
+			if err != nil {
+				messages = append(messages, mes)
+			}
+		}
+	}
+	log.Println(messages)*/
 	log.Printf("Returning %d users (excluding current user)", len(users))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)

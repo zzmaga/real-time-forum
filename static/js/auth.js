@@ -6,8 +6,9 @@ const mainContent = document.getElementById('main-content');
 
 export function renderLoginPage() {
     mainContent.innerHTML = `
-        <h2>Login</h2>
+        
         <form id="login-form">
+        <h2>Login</h2>
             <input type="text" id="login" placeholder="Nickname or Email" required>
             <input type="password" id="password" placeholder="Password" required>
             <span id="errmess"></span>
@@ -24,8 +25,8 @@ export function renderRegisterPage() {
     const day = String(today.getDate()).padStart(2, '0');
     const maxDate = `${year}-${month}-${day}`;
     mainContent.innerHTML = `
-        <h2>Register</h2>
         <form id="register-form">
+            <h2>Register</h2>
             <input type="text" id="nickname" placeholder="Nickname" maxlength="32" required>
             <input type="text" id="firstName" placeholder="First Name" required>
             <input type="text" id="lastName" placeholder="Last Name" required>

@@ -116,9 +116,9 @@ export async function fetchUsers() {
             return user && user.Nickname && typeof user.Nickname === 'string';
         });
         
-        validUsers.sort((a, b) => {
-            return a.Nickname.localeCompare(b.Nickname);
-        });
+        //validUsers.sort((a, b) => {
+        //    return a.Nickname.localeCompare(b.Nickname);
+        //});
         validUsers.forEach(user => {
             const userElement = document.createElement('div');
             userElement.className = 'user-item';

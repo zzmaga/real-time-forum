@@ -296,6 +296,19 @@ button[type="submit"]:hover, #create-post-btn:hover {
     gap: 10px;
 }
 
+#login-form{
+    justify-content: center; 
+    align-items: center;
+    max-height: 250px;
+    min-width: 300px;
+}
+
+#register-form{
+    max-height: 550px;
+    min-width: 300px;
+}
+
+
 #chat-input {
     flex: 1;
     padding: 10px;
