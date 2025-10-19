@@ -223,6 +223,7 @@ button[type="submit"]:hover, #create-post-btn:hover {
     text-align: center;
     margin-top: 0;
     flex-shrink: 0;
+    overflow-y: auto;
 }
 
 .user-item {
@@ -230,7 +231,9 @@ button[type="submit"]:hover, #create-post-btn:hover {
     border-bottom: 1px solid #eee;
     cursor: pointer;
     display: flex;
-    align-items: center;
+    flex-direction: column; /* This is the critical line */
+    flex-grow: 1; /* Ensures it takes up horizontal space next to the status dot */
+    min-width: 0;
     gap: 10px;
 }
 

@@ -40,27 +40,30 @@ func (m *MainHandler) GetAllUsersHandler(w http.ResponseWriter, r *http.Request)
 	for i, user := range allUsers {
 		log.Printf("User %d: ID=%d, Nickname='%s', Email='%s'", i, user.ID, user.Nickname, user.Email)
 	}
-
-	// Filter out the current user
-	var users []*models.User
-	for _, user := range allUsers {
-		if user.ID != session.UserID {
-			users = append(users, user)
-		}
+	type UserWithLastMessage struct {
+		User        *models.User           `json:"user"`
+		LastMessage *models.PrivateMessage `json:"last_message,omitempty"`
 	}
-	/*var messages []*models.PrivateMessage
+	var usersmess []UserWithLastMessage
 	for _, user := range allUsers {
 		if user.ID != session.UserID {
-			mes, err := m.service.PrivateMessage.GetLastMessageBetweenUsers(session.UserID, user.ID)
-			if err != nil {
-				messages = append(messages, mes)
+			//users = append(users, user)
+			mes, _ := m.service.PrivateMessage.GetLastMessageBetweenUsers(session.UserID, user.ID)
+			if mes != nil {
+				usersmess = append(usersmess, UserWithLastMessage{
+					User:        user,
+					LastMessage: mes,
+				})
+			} else {
+				usersmess = append(usersmess, UserWithLastMessage{
+					User:        user,
+					LastMessage: nil,
+				})
 			}
 		}
 	}
-	log.Println(messages)*/
-	log.Printf("Returning %d users (excluding current user)", len(users))
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(usersmess)
 }
 
 func (m *MainHandler) UserProfileHandler(w http.ResponseWriter, r *http.Request) {

@@ -111,25 +111,63 @@ export async function fetchUsers() {
         }
         
         const users = await response.json();
-        
-        const validUsers = users.filter(user => {
-            return user && user.Nickname && typeof user.Nickname === 'string';
+        console.log(users);
+        const validUsers = users.filter(us => {
+            return us && us.user.Nickname && typeof us.user.Nickname === 'string';
         });
+        validUsers.sort((a, b) => {
+            return a.user.Nickname.localeCompare(b.user.Nickname);
+        });
+        validUsers.sort((a, b) => {
+            const msgA = a.last_message;
+            const msgB = b.last_message;
+
+            // Case 1: If neither user has a last message, maintain original order (0)
+            if (!msgA && !msgB) {
+                return 0;
+            }
         
-        //validUsers.sort((a, b) => {
-        //    return a.Nickname.localeCompare(b.Nickname);
-        //});
-        validUsers.forEach(user => {
+            // Case 2: If A has a message but B doesn't, A is "newer" (comes first)
+            // We sort descending (newest first), so return -1 if A is newer.
+            if (msgA && !msgB) {
+                return -1;
+            }
+        
+            // Case 3: If B has a message but A doesn't, B is "newer" (comes first)
+            if (!msgA && msgB) {
+                return 1;
+            }
+
+            // Case 4: Both have messages. Convert strings to Date objects for comparison.
+            // The Date constructor correctly parses the Go timestamp string.
+            const dateA = new Date(msgA.CreatedAt);
+            const dateB = new Date(msgB.CreatedAt);
+        
+            // Subtracting one Date object from another yields a numeric value (timestamp difference).
+            // Sorting descending (newest first):
+            // If dateB is newer (larger timestamp), the result is positive, putting B first.
+            return dateB - dateA;
+        });
+        validUsers.forEach(us => {
+            const user = us.user;
             const userElement = document.createElement('div');
             userElement.className = 'user-item';
             userElement.dataset.userId = user.ID;
 
             const isOnline = checkUserOnlineStatus(user.ID);
             const statusDot = isOnline ? '<span class="status-dot online"></span>' : '<span class="status-dot offline"></span>';
+            const lastMsg = us.last_message;
+            let lastMsgPreview = 'No messages yet'; 
 
+            if (lastMsg) {
+                 // Use the Content property from models.PrivateMessage
+                 const content = lastMsg.Content; 
+                 lastMsgPreview = content.length > 30 ? content.substring(0, 30) + '...' : content;
+             }
             userElement.innerHTML = `
-                ${statusDot}
-                <span class="user-nickname">${user.Nickname}</span>
+                <span class="user-nickname">${statusDot} ${user.Nickname}</span>
+
+                <span class="mes">${lastMsgPreview}</span>
             `;
             
             userElement.addEventListener('click', () => {
