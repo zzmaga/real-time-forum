@@ -18,9 +18,7 @@ export function navigate(path) {
 
 function renderErrorPage() {
     mainContent.innerHTML = `
-        <h2>404 - Page Not Found</h2>
-        <p>The page you're looking for doesn't exist.</p>
-        <p><a href="#/posts">Go to Posts</a></p>
+        <h2>404 - Page Not Found<p><a href="#/posts">Go to Posts</a></p></h2>
     `;
 }
 
@@ -47,7 +45,8 @@ function renderPage(path) {
                 break;
             case '#/error':
             default:
-                navigate('#/error');
+                renderErrorPage();
+                break;
         }
     } else {
         switch (path) {

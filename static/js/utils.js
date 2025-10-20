@@ -79,9 +79,7 @@ export async function connectWebSocket() {
                 }
             }
         } else if (message.type === 'private_message') {
-            if(window.location.hash !== '#/chats'){
-                showAlert('infoAlert', 'NEW MESSAGE!', 'from '+message.payload.sender_name);
-            }
+            showAlert('infoAlert', 'NEW MESSAGE!', 'from '+message.payload.sender_name);
             handleIncomingPrivateMessage(message);
         }
     };

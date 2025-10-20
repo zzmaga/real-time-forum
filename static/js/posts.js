@@ -132,8 +132,9 @@ export async function showPostAndComments(postId) {
         });
         postData = await handleAuthResponse(response);
     } catch (error) {
-        console.error('Failed to fetch post:', error);
-        mainContent.innerHTML = '<p>An error occurred while fetching the post.</p>';
+        navigate('#/error');
+        //console.error('Failed to fetch post:', error);
+        //mainContent.innerHTML = '<p>An error occurred while fetching the post.</p>';
         return;
     }
 
