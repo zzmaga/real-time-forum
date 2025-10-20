@@ -354,14 +354,15 @@ func (m *MainHandler) DeletePostVoteHandler(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "vote not found", http.StatusNotFound)
 		return
 	}
-
+	log.Println(vote.Id)
 	err = m.service.PostVote.DeleteByID(vote.Id)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-
+	log.Println("here2")
 	voteUp, voteDown, err := m.service.PostVote.GetByPostID(voteData.PostID)
+	log.Println("here3")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
