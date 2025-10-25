@@ -1,4 +1,4 @@
-import { userToken, handleAuthResponse, ws } from './utils.js';
+import { userToken, handleAuthResponse, ws, onlineUserIds } from './utils.js';
 import { navigate } from './script.js';
 
 const mainContent = document.getElementById('main-content');
@@ -30,6 +30,12 @@ export function renderChatsPage() {
         chatForm.addEventListener('submit', handleSendMessage);
     }
 }
+
+// Export function to update users list when online status changes
+window.updateUsersList = function() {
+    // Re-render users list with updated online status
+    fetchUsers();
+};
 
 function throttle(func, limit) {
     let inThrottle;
@@ -164,7 +170,7 @@ export async function fetchUsers() {
 }
 
 function checkUserOnlineStatus(userId) {
-    return false;
+    return onlineUserIds.includes(userId);
 }
 
 async function fetchAndDisplayMessages(userId, offset, limit, prepend = false) {
@@ -281,6 +287,13 @@ function handleSendMessage(event) {
     const chatInput = document.getElementById('chat-input');
     const content = chatInput.value;
     if (!content.trim()) return;
+    
+    // Check if recipient is online
+    if (!onlineUserIds.includes(parseInt(recipientId))) {
+        alert('User is offline. You cannot send messages to offline users.');
+        return;
+    }
+    
     if (ws && ws.readyState === WebSocket.OPEN) {
         const message = {
             type: 'private_message',

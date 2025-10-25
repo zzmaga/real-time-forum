@@ -28,6 +28,49 @@ var (
 	broadcast = make(chan WebSocketMessage)
 )
 
+// GetOnlineUserIDs returns a slice of user IDs that are currently online
+func GetOnlineUserIDs() []int64 {
+	clientsMu.Lock()
+	defer clientsMu.Unlock()
+
+	onlineIDs := make([]int64, 0, len(clients))
+	for _, client := range clients {
+		onlineIDs = append(onlineIDs, client.userID)
+	}
+	return onlineIDs
+}
+
+// IsUserOnline checks if a user is currently online
+func IsUserOnline(userID int64) bool {
+	clientsMu.Lock()
+	defer clientsMu.Unlock()
+
+	for _, client := range clients {
+		if client.userID == userID {
+			return true
+		}
+	}
+	return false
+}
+
+// BroadcastOnlineUsers sends the list of online users to all connected clients
+func broadcastOnlineUsers() {
+	onlineUserIDs := GetOnlineUserIDs()
+
+	clientsMu.Lock()
+	defer clientsMu.Unlock()
+
+	for conn := range clients {
+		response := WebSocketMessage{
+			Type: "online_users",
+			Payload: map[string]interface{}{
+				"online_user_ids": onlineUserIDs,
+			},
+		}
+		conn.WriteJSON(response)
+	}
+}
+
 func (m *MainHandler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	// Get token from query parameter
 	token := r.URL.Query().Get("token")
@@ -72,6 +115,9 @@ func (m *MainHandler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("User %s connected via WebSocket", user.Nickname)
 
+	// Broadcast updated online users list to all clients
+	broadcastOnlineUsers()
+
 	// Handle messages
 	for {
 		var msg WebSocketMessage
@@ -95,6 +141,9 @@ func (m *MainHandler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	delete(clients, conn)
 	clientsMu.Unlock()
 	log.Printf("User %s disconnected from WebSocket", user.Nickname)
+
+	// Broadcast updated online users list to all remaining clients
+	broadcastOnlineUsers()
 }
 
 func (m *MainHandler) handlePrivateMessage(sender *Client, msg WebSocketMessage) {
@@ -111,6 +160,21 @@ func (m *MainHandler) handlePrivateMessage(sender *Client, msg WebSocketMessage)
 
 	content, ok := payload["content"].(string)
 	if !ok {
+		return
+	}
+
+	// Check if recipient is online
+	if !IsUserOnline(recipientID) {
+		// Send error message to sender
+		errorMsg := WebSocketMessage{
+			Type: "message_error",
+			Payload: map[string]interface{}{
+				"error":        "User is offline",
+				"recipient_id": recipientID,
+			},
+		}
+		sender.conn.WriteJSON(errorMsg)
+		log.Printf("Attempted to send message to offline user %d", recipientID)
 		return
 	}
 

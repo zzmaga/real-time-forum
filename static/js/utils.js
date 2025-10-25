@@ -4,7 +4,8 @@ import { handleIncomingPrivateMessage, getCurrentUserId } from './chats.js';
 
 export let userToken = localStorage.getItem('userToken');
 export let ws;
-let currentUserId = null; 
+let currentUserId = null;
+export let onlineUserIds = []; // Store online user IDs 
 
 const loginLink = document.getElementById('login-link');
 const registerLink = document.getElementById('register-link');
@@ -81,6 +82,17 @@ export async function connectWebSocket() {
         } else if (message.type === 'private_message') {
             showAlert('infoAlert', 'NEW MESSAGE!', 'from '+message.payload.sender_name);
             handleIncomingPrivateMessage(message);
+        } else if (message.type === 'online_users') {
+            // Update online users list
+            onlineUserIds = message.payload.online_user_ids || [];
+            console.log('Online users updated:', onlineUserIds);
+            // Trigger UI update if on chats page
+            if (window.updateUsersList) {
+                window.updateUsersList();
+            }
+        } else if (message.type === 'message_error') {
+            // Handle error message when trying to send to offline user
+            showAlert('errorAlert', 'Message Failed', message.payload.error);
         }
     };
 
