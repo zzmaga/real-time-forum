@@ -133,6 +133,8 @@ func (m *MainHandler) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		case "new_post":
 			// Broadcast new post to all clients
 			broadcast <- msg
+		case "new_comment":
+			broadcast <- msg
 		}
 	}
 

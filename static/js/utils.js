@@ -90,7 +90,17 @@ export async function connectWebSocket() {
             if (window.updateUsersList) {
                 window.updateUsersList();
             }
-        } else if (message.type === 'message_error') {
+        } else if(message.type === 'new_comment'){
+            const text = window.location.hash;
+            const postIdMatch = text.match(/^#\/posts\/(\d+)$/);
+            const postId = postIdMatch[1];
+            if(postId == message.payload.post_id && currentUserId !== message.payload.sender_id){
+                console.log(postId);
+                showAlert('infoAlert', 'NEW COMMENT', 'Update the page!');
+            } else if(currentUserId === message.payload.sender_id){
+                showAlert('successAlert', "COMMENT created!", "Page is updated");
+            }
+        }else if (message.type === 'message_error') {
             // Handle error message when trying to send to offline user
             showAlert('errorAlert', 'Message Failed', message.payload.error);
         }

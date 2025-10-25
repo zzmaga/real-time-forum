@@ -202,38 +202,6 @@ export async function showPostAndComments(postId) {
         </div>
         </div>
     `;
-    /*mainContent.innerHTML = `
-        <div class="centered-container">
-            <div class="single-post-container">
-                <div class="post-content-section">
-                    <h2>${escapeHTML(post.Title)}</h2>
-                    <p>${escapeHTML(post.Content)}</p>
-                    <small>
-                        By: ${escapeHTML(post.WUser.Nickname)} | 
-                        Categories: ${
-                            Array.isArray(post.WCategories) 
-                                ? post.WCategories.map(c => escapeHTML(c.Name)).join(', ') 
-                                : escapeHTML(post.WCategories.Name)
-                        }
-                    </small>
-                    <br>
-                    <button class="vote-btn ${post.WUserVote == 1 ? 'active-vote' : ''}" data-post-id="${post.Id}" data-vote-type="1">👍 <span class="like-count">${post.WVoteUp}</span></button>
-                    <button class="vote-btn ${post.WUserVote == -1 ? 'active-vote' : ''}" data-post-id="${post.Id}" data-vote-type="-1">👎 <span class="dislike-count">${post.WVoteDown}</span></button>
-                    <span id="errmess"></span>
-                </div>
-                <hr>
-                <form id="add-comment-form" class="comment-form-container">
-                    <textarea id="comment-content" placeholder="Write a comment..." required></textarea>
-                    <span id="comerrmess"></span>
-                    <button type="submit">Send Comment</button>
-                </form>
-                <div id="comments-section">
-                    <h3>Comments</h3>
-                    ${commentsHtml}
-                </div>
-            </div>
-        </div>
-    `;*/
     fetchUsers();
     document.getElementById('add-comment-form')
         .addEventListener('submit', (e) => handleAddComment(e, postId));
@@ -304,6 +272,12 @@ async function handleAddComment(e, postId) {
         document.getElementById('comment-content').value = '';
         // Reload the post to show the new comment
         showPostAndComments(postId);
+        const currentUserId = await getCurrentUserId();
+        const commentPayload ={
+            ...commentData,
+            sender_id: currentUserId
+        }
+        ws.send(JSON.stringify({type: 'new_comment', payload: commentPayload}))
     } else {
         document.getElementById("comerrmess").innerHTML = data.error;
     }
