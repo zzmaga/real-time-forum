@@ -53,7 +53,7 @@ function createMessageElement(msg, currentUserId) {
     const messageElement = document.createElement('div');
     const isSent = msg.SenderID === currentUserId;
     messageElement.className = `chat-message ${isSent ? 'sent' : 'received'}`;
-    const dateField = msg.CreatedAt;
+    const dateField = msg.CreatedAt || msg.created_at;
     const messageDate = new Date(dateField).toLocaleString();
     const senderName = isSent ? 'You' : msg.SenderNickname || msg.sender_name;
     messageElement.innerHTML = `
@@ -61,7 +61,7 @@ function createMessageElement(msg, currentUserId) {
             <span class="message-author">${escapeHTML(senderName)}</span> ‎ | ‎  
             <span class="message-date">${escapeHTML(messageDate)}</span>
         </div>
-        <p>${escapeHTML(msg.Content)}</p>
+        <p>${escapeHTML(msg.Content) || escapeHTML(msg.content)}</p>
     `;
     return messageElement;
 }
@@ -309,6 +309,7 @@ function handleSendMessage(event) {
             }
         };
         ws.send(JSON.stringify(message));
+        fetchUsers();
         chatInput.value = '';
         const messagesContainer = document.getElementById('messages-container');
         const placeholder = document.getElementById('no-messages-placeholder');

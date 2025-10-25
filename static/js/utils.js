@@ -1,5 +1,5 @@
 import { navigate, showAlert } from './script.js';
-import { handleIncomingPrivateMessage, getCurrentUserId } from './chats.js';
+import { handleIncomingPrivateMessage, getCurrentUserId, fetchUsers } from './chats.js';
 
 
 export let userToken = localStorage.getItem('userToken');
@@ -80,6 +80,7 @@ export async function connectWebSocket() {
                 }
             }
         } else if (message.type === 'private_message') {
+            fetchUsers();
             showAlert('infoAlert', 'NEW MESSAGE!', 'from '+message.payload.sender_name);
             handleIncomingPrivateMessage(message);
         } else if (message.type === 'online_users') {
