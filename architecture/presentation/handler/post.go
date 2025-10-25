@@ -102,7 +102,7 @@ func (m *MainHandler) CreatePostHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	var postData PostRequest
 	if err := json.NewDecoder(r.Body).Decode(&postData); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]any{"success": false})
 		return
 	}
 	newPost := &models.Post{
@@ -115,16 +115,14 @@ func (m *MainHandler) CreatePostHandler(w http.ResponseWriter, r *http.Request) 
 	// Create post
 	postID, err := m.service.Post.Create(newPost)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]any{"success": false})
 		return
 	}
 	// Add categories to post
 	if len(postData.Category) > 0 {
 		err = m.service.Category.AddToPostByNames(postData.Category, postID)
 		if err != nil {
-			// Log error but don't fail the post creation
-			// In production, you might want to handle this differently
-			http.Error(w, "Post created but failed to add categories", http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]any{"success": true, "message": "Post was created without incorrect categories or without categories"})
 			return
 		}
 	}
@@ -266,7 +264,7 @@ func (m *MainHandler) DeletePostHandler(w http.ResponseWriter, r *http.Request, 
 
 	err = m.service.Post.DeleteByID(postId)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, "error", http.StatusInternalServerError)
 		return
 	}
 
@@ -308,7 +306,7 @@ func (m *MainHandler) CreatePostVoteHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	if voteData.Vote != 1 && voteData.Vote != -1 {
-		http.Error(w, "vote must be 1 or -1", http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]any{"success": false, "message": "RECORD VOTE FAILURE"})
 		return
 	}
 
@@ -322,8 +320,7 @@ func (m *MainHandler) CreatePostVoteHandler(w http.ResponseWriter, r *http.Reque
 
 	err := m.service.PostVote.Record(vote)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]any{"success": false, "message": err.Error()})
 		return
 	}
 	voteUp, voteDown, err := m.service.PostVote.GetByPostID(voteData.PostID)
@@ -351,18 +348,16 @@ func (m *MainHandler) DeletePostVoteHandler(w http.ResponseWriter, r *http.Reque
 	// Get user's vote for this post
 	vote, err := m.service.PostVote.GetPostUserVote(userID, voteData.PostID)
 	if err != nil {
-		http.Error(w, "vote not found", http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]any{"success": false, "message": "DELETE VOTE FAILURE"})
 		return
 	}
 	log.Println(vote.Id)
 	err = m.service.PostVote.DeleteByID(vote.Id)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]any{"success": false, "message": "DELETE VOTE FAILURE"})
 		return
 	}
-	log.Println("here2")
 	voteUp, voteDown, err := m.service.PostVote.GetByPostID(voteData.PostID)
-	log.Println("here3")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,

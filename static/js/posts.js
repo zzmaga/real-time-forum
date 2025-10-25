@@ -1,5 +1,5 @@
 import { handleAuthResponse, userToken, ws } from './utils.js';
-import { navigate } from './script.js';
+import { navigate, showAlert } from './script.js';
 import {getCurrentUserId, fetchUsers,} from './chats.js'
 
 const mainContent = document.getElementById('main-content');
@@ -244,7 +244,7 @@ async function handleCreatePost(event) {
         };
         ws.send(JSON.stringify({ type: 'new_post', payload: postPayload}));
     } else {
-        document.getElementById("errmess").innerHTML = data.error;
+        showAlert('dangerAlert', 'POST CREATE FAILURE','Invalid or Empty input');
     }
 }
 
@@ -279,7 +279,7 @@ async function handleAddComment(e, postId) {
         }
         ws.send(JSON.stringify({type: 'new_comment', payload: commentPayload}))
     } else {
-        document.getElementById("comerrmess").innerHTML = data.error;
+        showAlert('dangerAlert', 'COMMENT CREATE FAILURE', 'Invalid or Empty input');
     }
 }
 
@@ -336,17 +336,17 @@ async function handleVote(event) {
                 }
             }
         } else {
-            alert(data.error || 'Failed to handle vote.');
+            showAlert('dangerAlert', data.message, 'Incorrect data');
         }
     } catch (error) {
         document.getElementById("errmess").innerHTML = data.error;
     }
 }
 
-function escapeHTML(str) {
+export function escapeHTML(str) {
     if (typeof str !== 'string') return str;
     return str
-        .replace(/&/g, "&amp;")
+        .replace(/&/g, "&amp;")  // 1. MUST be done first!
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")

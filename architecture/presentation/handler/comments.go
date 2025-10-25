@@ -50,7 +50,7 @@ func (m *MainHandler) CreateCommentHandler(w http.ResponseWriter, r *http.Reques
 	}
 	_, err = m.service.PostComment.Create(newComment)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]any{"success": false, "message": "Comment not created"})
 		return
 	}
 

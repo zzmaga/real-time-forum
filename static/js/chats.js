@@ -1,5 +1,6 @@
 import { userToken, handleAuthResponse, ws, onlineUserIds } from './utils.js';
 import { navigate, showAlert } from './script.js';
+import {escapeHTML} from './posts.js';
 
 const mainContent = document.getElementById('main-content');
 let selectedRecipientId = null;
@@ -48,27 +49,19 @@ function throttle(func, limit) {
     };
 }
 
-function debounce(func, delay) {
-    let timer;
-    return function (...args) {
-        clearTimeout(timer);
-        timer = setTimeout(() => func.apply(this, args), delay);
-    };
-}
-
 function createMessageElement(msg, currentUserId) {
     const messageElement = document.createElement('div');
     const isSent = msg.SenderID === currentUserId;
     messageElement.className = `chat-message ${isSent ? 'sent' : 'received'}`;
-    const dateField = msg.CreatedAt || msg.created_at;
+    const dateField = msg.CreatedAt;
     const messageDate = new Date(dateField).toLocaleString();
     const senderName = isSent ? 'You' : msg.SenderNickname || msg.sender_name;
     messageElement.innerHTML = `
         <div class="message-header">
-            <span class="message-author">${senderName}</span> ‎ | ‎  
-            <span class="message-date">${messageDate}</span>
+            <span class="message-author">${escapeHTML(senderName)}</span> ‎ | ‎  
+            <span class="message-date">${escapeHTML(messageDate)}</span>
         </div>
-        <p>${msg.Content || msg.content}</p>
+        <p>${escapeHTML(msg.Content)}</p>
     `;
     return messageElement;
 }
@@ -152,8 +145,8 @@ export async function fetchUsers() {
                 lastMsgPreview = content.length > 30 ? content.substring(0, 30) + '...' : content;
             }
             userElement.innerHTML = `
-                <span class="user-nickname">${statusDot} ${user.Nickname}</span>
-                <span class="mes">${lastMsgPreview}</span>
+                <span class="user-nickname">${statusDot} ${escapeHTML(user.Nickname)}</span>
+                <span class="mes">${escapeHTML(lastMsgPreview)}</span>
             `;
             userElement.addEventListener('click', () => {
                 if (window.location.hash !== '#/chats') {
