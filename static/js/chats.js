@@ -1,5 +1,5 @@
 import { userToken, handleAuthResponse, ws, onlineUserIds } from './utils.js';
-import { navigate } from './script.js';
+import { navigate, showAlert } from './script.js';
 
 const mainContent = document.getElementById('main-content');
 let selectedRecipientId = null;
@@ -262,6 +262,19 @@ async function selectUserForChat(userId, nickname) {
     messagesContainer.addEventListener('scroll', throttledScrollHandler);
     chatForm.style.display = 'flex';
     chatForm.dataset.recipientId = userId;
+    const inputContainer = document.getElementById('chat-input');
+    const submitCont = document.getElementById('send-button')
+    if(checkUserOnlineStatus(userId) === true){
+        inputContainer.disabled = false;
+        inputContainer.placeholder = 'Type a message';
+        submitCont.disabled = false;
+        submitCont.textContent = '>';
+    } else{
+        inputContainer.disabled = true;
+        inputContainer.placeholder = 'The user is offline';
+        submitCont.disabled = true;
+        submitCont.textContent = 'X';
+    }
     await fetchAndDisplayMessages(userId, currentMessageOffset, messageLimit, false);
 }
 
@@ -290,7 +303,7 @@ function handleSendMessage(event) {
     
     // Check if recipient is online
     if (!onlineUserIds.includes(parseInt(recipientId))) {
-        alert('User is offline. You cannot send messages to offline users.');
+        showAlert('warningAlert', "User if offline", 'You cannot send messages to offline users.')
         return;
     }
     
